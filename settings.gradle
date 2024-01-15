@@ -1,0 +1,5 @@
+rootProject.name = "IPCBus"
+include ':client'
+include ':server'
+include ':ipc'
+include ':sdk_base'
