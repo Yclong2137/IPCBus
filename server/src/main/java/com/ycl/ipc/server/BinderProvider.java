@@ -44,14 +44,15 @@ public final class BinderProvider extends ContentProvider {
             public void register11(ICarListener iCarListener) {
                 Log.i(TAG, "register11() called with: iCarListener = [" + iCarListener + "]");
                 callbackList.register(iCarListener);
-                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
-                    @Override
-                    public void invokeItem(ICarListener item) {
-                        iCarListener.test(3333333);
-
-                    }
-
-                });
+                throw new IllegalStateException("+++++++++++++++++");
+//                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
+//                    @Override
+//                    public void invokeItem(ICarListener item) {
+//                        iCarListener.test(3333333);
+//
+//                    }
+//
+//                });
 //                System.out.println(">>>>>>>> asBinder = "+iCarListener.asBinder());
 //                int count = callbackList.beginBroadcast();
 //                for (int i = 0; i < count; i++) {

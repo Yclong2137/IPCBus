@@ -1,5 +1,6 @@
 package com.ycl.ipc.bus;
 
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
@@ -19,44 +20,48 @@ public class IPCMethod {
     private final int code;
     private final Method method;
     private final String interfaceName;
-    private final Class<?>[] parameterTypes;
+    final Class<?>[] parameterTypes;
+    final boolean oneway;
     private final MethodParamConverter[] converters;
     private final MethodParamConverter resultConverter;
+
+
+    final MethodParamConverter.Factory paramConverterFactory = new MethodParamConverter.Factory() {
+
+        @Override
+        public MethodParamConverter get(Class<?> paramType) {
+            if (isInterfaceParam(paramType)) {
+                return new InterfaceParamConverter(paramType);
+            }
+            return null;
+        }
+
+        private boolean isAidlParam(Class<?> type) {
+            return type.isInterface() && IInterface.class.isAssignableFrom(type);
+        }
+
+        private boolean isInterfaceParam(Class<?> type) {
+            return type.isInterface();
+        }
+
+    };
+
 
     public IPCMethod(int code, Method method, String interfaceName) {
         this.code = code;
         this.method = method;
+        Class<?> returnType = method.getReturnType();
+        oneway = method.isAnnotationPresent(Oneway.class) && void.class == returnType;
         this.interfaceName = interfaceName;
         parameterTypes = method.getParameterTypes();
         converters = new MethodParamConverter[parameterTypes.length];
 
-        final MethodParamConverter.Factory paramConverterFactory = new MethodParamConverter.Factory() {
-
-            @Override
-            public MethodParamConverter get(Class<?> paramType) {
-                if (isInterfaceParam(paramType)) {
-                    return new InterfaceParamConverter(paramType);
-                }
-                return null;
-            }
-
-            private boolean isAidlParam(Class<?> type) {
-                return type.isInterface() && IInterface.class.isAssignableFrom(type);
-            }
-
-            private boolean isInterfaceParam(Class<?> type) {
-                return type.isInterface();
-            }
-
-        };
         for (int i = 0; i < parameterTypes.length; i++) {
             converters[i] = paramConverterFactory.get(parameterTypes[i]);
         }
-        Class<?> returnType = method.getReturnType();
         resultConverter = paramConverterFactory.get(returnType);
 
     }
-
 
     public String getInterfaceName() {
         return interfaceName;
@@ -66,27 +71,20 @@ public class IPCMethod {
         return method;
     }
 
-    private boolean isSupportOneway() {
-        return this.method.isAnnotationPresent(Oneway.class) && Void.class == method.getReturnType();
-    }
-
     public void handleTransact(Object server, Parcel data, Parcel reply) {
         data.enforceInterface(interfaceName);
         Object[] parameters = data.readArray(getClass().getClassLoader());
-        if (parameters != null && parameters.length > 0) {
-            for (int i = 0; i < parameters.length; i++) {
-                if (converters[i] != null) {
-                    parameters[i] = converters[i].convert(parameters[i], true);
-                }
-            }
-        }
         try {
-            Object res = method.invoke(server, parameters);
-            reply.writeNoException();
-            reply.writeValue(res);
+            Object res = method.invoke(server, applyParamConverter(parameters, true));
+            if (reply != null && !oneway) {
+                reply.writeNoException();
+                reply.writeValue(res);
+            }
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
-            reply.writeException(e);
+            if (reply != null && !oneway) {
+                reply.writeException(new IllegalStateException(e));
+            }
         }
     }
 
@@ -94,21 +92,16 @@ public class IPCMethod {
     public Object callRemote(IBinder server, Object[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
-        Object result;
+        Object result = null;
         try {
             data.writeInterfaceToken(interfaceName);
-            for (int i = 0; i < args.length; i++) {
-                MethodParamConverter converter = converters[i];
-                if (converter != null) {
-                    args[i] = converter.convert(args[i], false);
-                }
-            }
-            data.writeArray(args);
-            server.transact(code, data, reply, 0);
-            reply.readException();
-            result = readValue(reply);
-            if (resultConverter != null) {
-                result = resultConverter.convert(result, false);
+            data.writeArray(applyParamConverter(args, false));
+            if (oneway) {
+                server.transact(code, data, null, Binder.FLAG_ONEWAY);
+            } else {
+                server.transact(code, data, reply, 0);
+                reply.readException();
+                result = applyResultConverter(readValue(reply), false);
             }
         } finally {
             data.recycle();
@@ -121,9 +114,27 @@ public class IPCMethod {
         Object result = replay.readValue(getClass().getClassLoader());
         if (result instanceof Parcelable[]) {
             Parcelable[] parcelables = (Parcelable[]) result;
-            Object[] results = (Object[]) Array.newInstance(method.getReturnType().getComponentType(), parcelables.length);
+            Object[] results = (Object[]) Array.newInstance(Objects.requireNonNull(method.getReturnType().getComponentType()), parcelables.length);
             System.arraycopy(parcelables, 0, results, 0, results.length);
             return results;
+        }
+        return result;
+    }
+
+    private Object[] applyParamConverter(Object[] args, boolean isServer) {
+        if (args == null || args.length == 0) return args;
+        for (int i = 0; i < args.length; i++) {
+            MethodParamConverter converter = converters[i];
+            if (converter != null) {
+                args[i] = converter.convert(args[i], isServer);
+            }
+        }
+        return args;
+    }
+
+    private Object applyResultConverter(Object result, boolean isServer) {
+        if (resultConverter != null) {
+            return resultConverter.convert(result, isServer);
         }
         return result;
     }
