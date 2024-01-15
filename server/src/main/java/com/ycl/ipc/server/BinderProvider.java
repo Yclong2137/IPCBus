@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -15,12 +14,9 @@ import androidx.core.app.BundleCompat;
 import com.ycl.ipc.IServiceFetcher;
 import com.ycl.ipc.bus.IPCBus;
 import com.ycl.ipc.bus.RemoteCallbackListExt;
-import com.ycl.ipc.bus.ServiceCache;
 import com.ycl.sdk_base.IActivityManager;
 import com.ycl.sdk_base.ICarListener;
 import com.ycl.sdk_base.bean.VideoViewAngleData;
-
-import java.util.function.Consumer;
 
 
 public final class BinderProvider extends ContentProvider {
@@ -44,22 +40,15 @@ public final class BinderProvider extends ContentProvider {
             public void register11(ICarListener iCarListener) {
                 Log.i(TAG, "register11() called with: iCarListener = [" + iCarListener + "]");
                 callbackList.register(iCarListener);
-                throw new IllegalStateException("+++++++++++++++++");
-//                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
-//                    @Override
-//                    public void invokeItem(ICarListener item) {
-//                        iCarListener.test(3333333);
-//
-//                    }
-//
-//                });
-//                System.out.println(">>>>>>>> asBinder = "+iCarListener.asBinder());
-//                int count = callbackList.beginBroadcast();
-//                for (int i = 0; i < count; i++) {
-//                    ICarListener item = callbackList.getBroadcastItem(i);
-//                    item.test(22222);
-//                }
-//                callbackList.finishBroadcast();
+                //throw new IllegalStateException("+++++++++++++++++");
+                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
+                    @Override
+                    public void invokeItem(ICarListener item) {
+                        iCarListener.test(3333333);
+
+                    }
+
+                });
             }
         });
         return true;
@@ -109,7 +98,7 @@ public final class BinderProvider extends ContentProvider {
         public IBinder getService(String name) throws RemoteException {
             Log.i(TAG, "getService() called with: name = [" + name + "]");
             if (name != null) {
-                return ServiceCache.getService(name);
+                return IPCBus.getBinderStub(name);
             }
             return null;
         }

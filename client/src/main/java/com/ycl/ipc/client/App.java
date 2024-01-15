@@ -22,9 +22,20 @@ public class App extends Application {
         IPCBus.initialize(new IServerCache() {
 
             @Override
-            public IBinder query(String serverName) {
+            public void addBinderStub(String serverName, IBinder binder) {
+                ServiceCache.addService(serverName, binder);
+            }
+
+            @Override
+            public IBinder getBinderProxy(String serverName) {
                 return ServiceManagerNative.getService(serverName);
             }
+
+            @Override
+            public IBinder getBinderStub(String serverName) {
+                return ServiceCache.getService(serverName);
+            }
+
         });
     }
 

@@ -10,9 +10,6 @@ import android.os.SystemClock;
 
 public class ContentProviderCompat {
     public static Bundle call(Context context, Uri uri, String method, String arg, Bundle extras) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return context.getContentResolver().call(uri, method, arg, extras);
-        }
         ContentProviderClient client = crazyAcquireContentProvider(context, uri);
         Bundle res = null;
         try {
@@ -27,10 +24,7 @@ public class ContentProviderCompat {
 
 
     private static ContentProviderClient acquireContentProviderClient(Context context, Uri uri) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            return context.getContentResolver().acquireUnstableContentProviderClient(uri);
-        }
-        return context.getContentResolver().acquireContentProviderClient(uri);
+        return context.getContentResolver().acquireUnstableContentProviderClient(uri);
     }
 
     public static ContentProviderClient crazyAcquireContentProvider(Context context, Uri uri) {
@@ -60,10 +54,7 @@ public class ContentProviderCompat {
     }
 
     private static ContentProviderClient acquireContentProviderClient(Context context, String name) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            return context.getContentResolver().acquireUnstableContentProviderClient(name);
-        }
-        return context.getContentResolver().acquireContentProviderClient(name);
+        return context.getContentResolver().acquireUnstableContentProviderClient(name);
     }
 
     public static void releaseQuietly(ContentProviderClient client) {

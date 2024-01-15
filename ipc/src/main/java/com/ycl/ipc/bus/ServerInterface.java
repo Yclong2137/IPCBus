@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class ServerInterface {
+public final class ServerInterface {
 
     private final Class<?> interfaceClass;
     private final SparseArray<IPCMethod> codeToInterfaceMethod;

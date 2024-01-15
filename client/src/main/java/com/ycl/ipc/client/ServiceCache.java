@@ -1,4 +1,4 @@
-package com.ycl.ipc.bus;
+package com.ycl.ipc.client;
 
 import android.os.IBinder;
 import android.util.ArrayMap;

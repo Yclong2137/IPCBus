@@ -28,15 +28,15 @@ public class IPCBus {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);
-        sCache.join(serverInterface.getInterfaceName(), binder);
+        sCache.addBinderStub(serverInterface.getInterfaceName(), binder);
     }
 
-    public static <T> T get(Class<?> interfaceClass, IBinder service) {
+    public static <T> T getBinderProxy(Class<?> interfaceClass, IBinder delegate) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
-        IBinder binder = service;
+        IBinder binder = delegate;
         if (binder == null) {
-            binder = sCache.query(serverInterface.getInterfaceName());
+            binder = sCache.getBinderProxy(serverInterface.getInterfaceName());
         }
         if (binder == null) {
             return null;
@@ -45,13 +45,18 @@ public class IPCBus {
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
     }
 
-    public static <T> T get(Class<?> interfaceClass) {
-        return get(interfaceClass, null);
+    public static <T> T getBinderProxy(Class<?> interfaceClass) {
+        return getBinderProxy(interfaceClass, null);
     }
 
 
-    public static Object getServiceStub(Class<?> interfaceClass) {
-        return sCache.get(interfaceClass.getName());
+    public static IBinder getBinderStub(Class<?> interfaceClass) {
+        return getBinderStub(interfaceClass.getName());
+
+    }
+
+    public static IBinder getBinderStub(String name) {
+        return sCache.getBinderStub(name);
 
     }
 

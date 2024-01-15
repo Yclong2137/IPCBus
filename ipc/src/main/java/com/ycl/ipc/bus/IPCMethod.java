@@ -2,7 +2,6 @@ package com.ycl.ipc.bus;
 
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -15,7 +14,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 
-public class IPCMethod {
+public final class IPCMethod {
 
     private final int code;
     private final Method method;
@@ -34,10 +33,6 @@ public class IPCMethod {
                 return new InterfaceParamConverter(paramType);
             }
             return null;
-        }
-
-        private boolean isAidlParam(Class<?> type) {
-            return type.isInterface() && IInterface.class.isAssignableFrom(type);
         }
 
         private boolean isInterfaceParam(Class<?> type) {
@@ -174,10 +169,10 @@ public class IPCMethod {
             if (param != null) {
                 if (isServer) {//server
                     IPCBus.register(type, param);
-                    return IPCBus.get(type, (IBinder) param);
+                    return IPCBus.getBinderProxy(type, (IBinder) param);
                 } else {//client
                     IPCBus.register(type, param);
-                    return IPCBus.getServiceStub(type);
+                    return IPCBus.getBinderStub(type);
                 }
             }
             return null;

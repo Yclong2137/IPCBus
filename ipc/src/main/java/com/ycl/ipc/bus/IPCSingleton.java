@@ -1,7 +1,7 @@
 package com.ycl.ipc.bus;
 
 
-public class IPCSingleton<T> {
+public final class IPCSingleton<T> {
 
     private final Class<?> ipcClass;
     private T instance;
@@ -14,7 +14,7 @@ public class IPCSingleton<T> {
         if (instance == null) {
             synchronized (this) {
                 if (instance == null) {
-                    instance = IPCBus.get(ipcClass);
+                    instance = IPCBus.getBinderProxy(ipcClass);
                 }
             }
         }

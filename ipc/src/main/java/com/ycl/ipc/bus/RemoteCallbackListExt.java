@@ -6,7 +6,7 @@ import android.os.RemoteCallbackList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public final class RemoteCallbackListExt<T> {
+public class RemoteCallbackListExt<T> {
 
     private final RemoteCallbackList<IInterface> remoteCallbackList = new RemoteCallbackList<>();
 

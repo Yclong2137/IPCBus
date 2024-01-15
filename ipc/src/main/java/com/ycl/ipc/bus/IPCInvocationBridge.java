@@ -1,12 +1,12 @@
 package com.ycl.ipc.bus;
 
 import android.os.IBinder;
-import android.util.Log;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-public class IPCInvocationBridge implements InvocationHandler {
+public final class IPCInvocationBridge implements InvocationHandler {
+
     private final ServerInterface serverInterface;
     private final IBinder binder;
 
