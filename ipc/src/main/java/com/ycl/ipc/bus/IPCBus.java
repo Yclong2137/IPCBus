@@ -5,6 +5,8 @@ import android.os.IBinder;
 import android.os.IInterface;
 
 import java.lang.reflect.Proxy;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * IPC总线
@@ -12,6 +14,8 @@ import java.lang.reflect.Proxy;
 public final class IPCBus {
 
     private static IServerCache sCache;
+
+    private static final Set<TransformBinder> binderSet = new HashSet<>();
 
     public static void initialize(IServerCache cache) {
         System.out.println("IPCBus.initialize " + cache);
@@ -24,10 +28,12 @@ public final class IPCBus {
         }
     }
 
+
     public static synchronized void register(Class<?> interfaceClass, Object server) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);
+        binderSet.add(binder);
         sCache.addBinderStub(serverInterface.getInterfaceName(), binder);
     }
 
@@ -58,6 +64,15 @@ public final class IPCBus {
     public static IBinder getBinderStub(String name) {
         return sCache.getBinderStub(name);
 
+    }
+
+    static IBinder getBinder(Object server) {
+        for (TransformBinder transformBinder : binderSet) {
+            if (server == transformBinder.getServer()) {
+                return transformBinder;
+            }
+        }
+        return null;
     }
 
 }

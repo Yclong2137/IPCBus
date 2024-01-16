@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 
 import com.ycl.ipc.annotation.Oneway;
+import com.ycl.ipc.annotation.Unsubscribe;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -30,7 +31,7 @@ public final class IPCMethod {
         @Override
         public Converter get(Class<?> paramType) {
             if (isInterfaceParam(paramType)) {
-                return new InterfaceParamConverter(paramType);
+                return new InterfaceParamConverter(method, paramType);
             }
             return null;
         }
@@ -172,11 +173,12 @@ public final class IPCMethod {
 
     private static class InterfaceParamConverter implements Converter {
 
-
         private final Class<?> type;
+        private final boolean unsubscribe;
 
-        InterfaceParamConverter(Class<?> type) {
+        InterfaceParamConverter(Method method, Class<?> type) {
             this.type = type;
+            this.unsubscribe = method.isAnnotationPresent(Unsubscribe.class);
         }
 
         @Override
@@ -189,8 +191,11 @@ public final class IPCMethod {
                         break;
                     case Converter.FLAG_TRANSACT:
                         //作为Server
-                        IPCBus.register(type, param);
-                        res = IPCBus.getBinderStub(type);
+                        IBinder binder = IPCBus.getBinder(param);
+                        if (binder == null && !unsubscribe) {
+                            IPCBus.register(type, param);
+                        }
+                        res = IPCBus.getBinder(param);
                         break;
                 }
             }

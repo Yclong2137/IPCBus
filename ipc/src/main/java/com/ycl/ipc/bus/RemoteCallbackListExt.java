@@ -21,7 +21,7 @@ public class RemoteCallbackListExt<T> {
 
     public boolean unregister(T callback) {
         if (callback instanceof IInterface) {
-            return remoteCallbackList.register((IInterface) callback);
+            return remoteCallbackList.unregister((IInterface) callback);
         }
         return false;
     }

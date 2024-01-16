@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        findViewById(R.id.btn_register).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_unregister).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 iActivityManager.unregister(iCarListener);

@@ -33,18 +33,25 @@ public final class BinderProvider extends ContentProvider {
             @Override
             public String getPackageName(int a, VideoViewAngleData data) {
                 Log.i(TAG, "getPackageName() called with: a = [" + a + "], data = [" + data + "]");
+                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
+                    @Override
+                    public void invokeItem(ICarListener item) {
+                        item.test(3333);
+                    }
+                });
                 return "这是测试包名";
             }
 
             @Override
             public void register(ICarListener iCarListener) {
-
+                Log.i(TAG, "register() called with: iCarListener = [" + iCarListener + "]");
+                callbackList.register(iCarListener);
             }
 
             @Override
             public void unregister(ICarListener iCarListener) {
-                Log.i(TAG, "register11() called with: iCarListener = [" + iCarListener + "]");
-                callbackList.register(iCarListener);
+                Log.i(TAG, "unregister() called with: iCarListener = [" + iCarListener + "]");
+                callbackList.unregister(iCarListener);
             }
         });
         return true;
