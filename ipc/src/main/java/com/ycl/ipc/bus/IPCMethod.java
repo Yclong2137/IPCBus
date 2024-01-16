@@ -88,13 +88,16 @@ public final class IPCMethod {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         Object result = null;
+        boolean status;
         try {
             data.writeInterfaceToken(interfaceName);
             data.writeArray(applyParamConverter(args, Converter.FLAG_TRANSACT));
             if (oneway) {
-                server.transact(code, data, null, Binder.FLAG_ONEWAY);
+                status = server.transact(code, data, null, Binder.FLAG_ONEWAY);
+                if (handleStatus(status)) return null;
             } else {
-                server.transact(code, data, reply, 0);
+                status = server.transact(code, data, reply, 0);
+                if (handleStatus(status)) return null;
                 reply.readException();
                 result = applyResultConverter(readValue(reply), Converter.FLAG_TRANSACT);
             }
@@ -103,6 +106,15 @@ public final class IPCMethod {
             reply.recycle();
         }
         return result;
+    }
+
+    private boolean handleStatus(boolean status) {
+        if (!status) {
+            final String msg = "method " + method.getName() + " occur error, the transaction code(" + code + ") was not understood!!!";
+            new IllegalStateException(msg).printStackTrace();
+            return true;
+        }
+        return false;
     }
 
     private Object readValue(Parcel replay) {

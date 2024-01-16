@@ -37,18 +37,14 @@ public final class BinderProvider extends ContentProvider {
             }
 
             @Override
-            public void register11(ICarListener iCarListener) {
+            public void register(ICarListener iCarListener) {
+
+            }
+
+            @Override
+            public void unregister(ICarListener iCarListener) {
                 Log.i(TAG, "register11() called with: iCarListener = [" + iCarListener + "]");
                 callbackList.register(iCarListener);
-                //throw new IllegalStateException("+++++++++++++++++");
-                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
-                    @Override
-                    public void invokeItem(ICarListener item) {
-                        iCarListener.test(3333333);
-
-                    }
-
-                });
             }
         });
         return true;

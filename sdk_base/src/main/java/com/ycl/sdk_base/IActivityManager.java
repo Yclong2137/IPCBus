@@ -8,7 +8,11 @@ public interface IActivityManager {
     String getPackageName(int a, VideoViewAngleData data);
 
     @Oneway
-    void register11(ICarListener iCarListener);
+    void register(ICarListener iCarListener);
+    @Oneway
+    default void unregister(ICarListener iCarListener){
+
+    }
 
 
 }
