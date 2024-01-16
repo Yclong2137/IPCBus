@@ -21,7 +21,7 @@ public final class IPCInvocationBridge implements InvocationHandler {
             return method.invoke(this, args);
         }
         //兼容IInterface
-        if ("asBinder".endsWith(method.getName())) {
+        if ("asBinder".equals(method.getName())) {
             return binder;
         }
         IPCMethod ipcMethod = serverInterface.getIPCMethod(method);

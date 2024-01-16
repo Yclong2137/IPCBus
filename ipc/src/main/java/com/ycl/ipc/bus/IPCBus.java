@@ -9,7 +9,7 @@ import java.lang.reflect.Proxy;
 /**
  * IPC总线
  */
-public class IPCBus {
+public final class IPCBus {
 
     private static IServerCache sCache;
 
@@ -24,7 +24,7 @@ public class IPCBus {
         }
     }
 
-    public static void register(Class<?> interfaceClass, Object server) {
+    public static synchronized void register(Class<?> interfaceClass, Object server) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);

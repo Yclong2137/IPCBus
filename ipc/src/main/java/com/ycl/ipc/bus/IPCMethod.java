@@ -21,14 +21,14 @@ public final class IPCMethod {
     private final String interfaceName;
     final Class<?>[] parameterTypes;
     final boolean oneway;
-    private final MethodParamConverter[] converters;
-    private final MethodParamConverter resultConverter;
+    private final Converter[] converters;
+    private final Converter resultConverter;
 
 
-    final MethodParamConverter.Factory paramConverterFactory = new MethodParamConverter.Factory() {
+    final Converter.Factory paramConverterFactory = new Converter.Factory() {
 
         @Override
-        public MethodParamConverter get(Class<?> paramType) {
+        public Converter get(Class<?> paramType) {
             if (isInterfaceParam(paramType)) {
                 return new InterfaceParamConverter(paramType);
             }
@@ -49,7 +49,7 @@ public final class IPCMethod {
         oneway = method.isAnnotationPresent(Oneway.class) && void.class == returnType;
         this.interfaceName = interfaceName;
         parameterTypes = method.getParameterTypes();
-        converters = new MethodParamConverter[parameterTypes.length];
+        converters = new Converter[parameterTypes.length];
 
         for (int i = 0; i < parameterTypes.length; i++) {
             converters[i] = paramConverterFactory.get(parameterTypes[i]);
@@ -70,7 +70,7 @@ public final class IPCMethod {
         data.enforceInterface(interfaceName);
         Object[] parameters = data.readArray(getClass().getClassLoader());
         try {
-            Object res = method.invoke(server, applyParamConverter(parameters, true));
+            Object res = method.invoke(server, applyParamConverter(parameters, Converter.FLAG_ON_TRANSACT));
             if (reply != null && !oneway) {
                 reply.writeNoException();
                 reply.writeValue(res);
@@ -90,13 +90,13 @@ public final class IPCMethod {
         Object result = null;
         try {
             data.writeInterfaceToken(interfaceName);
-            data.writeArray(applyParamConverter(args, false));
+            data.writeArray(applyParamConverter(args, Converter.FLAG_TRANSACT));
             if (oneway) {
                 server.transact(code, data, null, Binder.FLAG_ONEWAY);
             } else {
                 server.transact(code, data, reply, 0);
                 reply.readException();
-                result = applyResultConverter(readValue(reply), false);
+                result = applyResultConverter(readValue(reply), Converter.FLAG_TRANSACT);
             }
         } finally {
             data.recycle();
@@ -116,20 +116,20 @@ public final class IPCMethod {
         return result;
     }
 
-    private Object[] applyParamConverter(Object[] args, boolean isServer) {
+    private Object[] applyParamConverter(Object[] args, int flags) {
         if (args == null || args.length == 0) return args;
         for (int i = 0; i < args.length; i++) {
-            MethodParamConverter converter = converters[i];
+            Converter converter = converters[i];
             if (converter != null) {
-                args[i] = converter.convert(args[i], isServer);
+                args[i] = converter.convert(args[i], flags);
             }
         }
         return args;
     }
 
-    private Object applyResultConverter(Object result, boolean isServer) {
+    private Object applyResultConverter(Object result, int flags) {
         if (resultConverter != null) {
-            return resultConverter.convert(result, isServer);
+            return resultConverter.convert(result, flags);
         }
         return result;
     }
@@ -145,17 +145,20 @@ public final class IPCMethod {
     }
 
 
-    public interface MethodParamConverter {
+    public interface Converter {
 
-        Object convert(Object param, boolean isServer);
+        int FLAG_TRANSACT = 0;
+        int FLAG_ON_TRANSACT = 1;
+
+        Object convert(Object param, int flags);
 
         abstract class Factory {
-            public abstract MethodParamConverter get(Class<?> paramType);
+            public abstract Converter get(Class<?> paramType);
         }
     }
 
 
-    private static class InterfaceParamConverter implements MethodParamConverter {
+    private static class InterfaceParamConverter implements Converter {
 
 
         private final Class<?> type;
@@ -165,17 +168,21 @@ public final class IPCMethod {
         }
 
         @Override
-        public Object convert(Object param, boolean isServer) {
+        public Object convert(Object param, int flags) {
+            Object res = param;
             if (param != null) {
-                if (isServer) {//server
-                    IPCBus.register(type, param);
-                    return IPCBus.getBinderProxy(type, (IBinder) param);
-                } else {//client
-                    IPCBus.register(type, param);
-                    return IPCBus.getBinderStub(type);
+                switch (flags) {
+                    case Converter.FLAG_ON_TRANSACT:
+                        res = IPCBus.getBinderProxy(type, (IBinder) param);
+                        break;
+                    case Converter.FLAG_TRANSACT:
+                        //作为Server
+                        IPCBus.register(type, param);
+                        res = IPCBus.getBinderStub(type);
+                        break;
                 }
             }
-            return null;
+            return res;
         }
     }
 
