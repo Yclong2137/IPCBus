@@ -8,6 +8,10 @@ public interface IActivityManager {
 
     String getPackageName(int a, VideoViewAngleData data);
 
+    int setACState(int state);
+
+    int getACState();
+
     @Oneway
     void register(ICarListener iCarListener);
 

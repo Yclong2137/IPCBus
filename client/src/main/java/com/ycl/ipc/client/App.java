@@ -21,20 +21,12 @@ public class App extends Application {
         super.attachBaseContext(base);
         IPCBus.initialize(new IServerCache() {
 
-            @Override
-            public void addBinderStub(String serverName, IBinder binder) {
-                ServiceCache.addService(serverName, binder);
-            }
 
             @Override
-            public IBinder getBinderProxy(String serverName) {
+            public IBinder queryBinderProxy(String serverName) {
                 return ServiceManagerNative.getService(serverName);
             }
 
-            @Override
-            public IBinder getBinderStub(String serverName) {
-                return ServiceCache.getService(serverName);
-            }
 
         });
     }

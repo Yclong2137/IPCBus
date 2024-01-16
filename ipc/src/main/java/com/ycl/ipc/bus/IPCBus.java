@@ -5,8 +5,6 @@ import android.os.IBinder;
 import android.os.IInterface;
 
 import java.lang.reflect.Proxy;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * IPC总线
@@ -15,7 +13,6 @@ public final class IPCBus {
 
     private static IServerCache sCache;
 
-    private static final Set<TransformBinder> binderSet = new HashSet<>();
 
     public static void initialize(IServerCache cache) {
         System.out.println("IPCBus.initialize " + cache);
@@ -33,16 +30,15 @@ public final class IPCBus {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);
-        binderSet.add(binder);
         sCache.addBinderStub(serverInterface.getInterfaceName(), binder);
     }
 
-    public static <T> T getBinderProxy(Class<?> interfaceClass, IBinder delegate) {
+    public static <T> T queryBinderProxy(Class<?> interfaceClass, IBinder delegate) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         IBinder binder = delegate;
         if (binder == null) {
-            binder = sCache.getBinderProxy(serverInterface.getInterfaceName());
+            binder = sCache.queryBinderProxy(serverInterface.getInterfaceName());
         }
         if (binder == null) {
             return null;
@@ -51,10 +47,13 @@ public final class IPCBus {
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
     }
 
-    public static <T> T getBinderProxy(Class<?> interfaceClass) {
-        return getBinderProxy(interfaceClass, null);
+    public static <T> T queryBinderProxy(Class<?> interfaceClass) {
+        return queryBinderProxy(interfaceClass, null);
     }
 
+    static IBinder queryBinderProxy(String serverName) {
+        return sCache.queryBinderProxy(serverName);
+    }
 
     public static IBinder getBinderStub(Class<?> interfaceClass) {
         return getBinderStub(interfaceClass.getName());
@@ -67,12 +66,7 @@ public final class IPCBus {
     }
 
     static IBinder getBinder(Object server) {
-        for (TransformBinder transformBinder : binderSet) {
-            if (server == transformBinder.getServer()) {
-                return transformBinder;
-            }
-        }
-        return null;
+        return sCache.getBinderStubByServer(server);
     }
 
 }

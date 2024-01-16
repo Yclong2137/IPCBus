@@ -58,5 +58,20 @@ public class MainActivity extends Activity {
                 iActivityManager.unregister(iCarListener);
             }
         });
+
+        findViewById(R.id.btn_setACState).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("setACState >>>>>>>>>>>>>>>>> " + iActivityManager.setACState(88888));
+
+            }
+        });
+
+        findViewById(R.id.btn_getACState).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("getACState >>>>>>>>>>>>>>>>> " + iActivityManager.getACState());
+            }
+        });
     }
 }

@@ -43,6 +43,17 @@ public final class BinderProvider extends ContentProvider {
             }
 
             @Override
+            public int setACState(int state) {
+                Log.i(TAG, "setACState() called with: state = [" + state + "]");
+                return 1000;
+            }
+
+            @Override
+            public int getACState() {
+                return 2000;
+            }
+
+            @Override
             public void register(ICarListener iCarListener) {
                 Log.i(TAG, "register() called with: iCarListener = [" + iCarListener + "]");
                 callbackList.register(iCarListener);

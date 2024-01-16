@@ -6,11 +6,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 
+import com.ycl.ipc.HiExecutor;
 import com.ycl.ipc.annotation.Oneway;
 import com.ycl.ipc.annotation.Unsubscribe;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -71,14 +71,29 @@ public final class IPCMethod {
         data.enforceInterface(interfaceName);
         Object[] parameters = data.readArray(getClass().getClassLoader());
         try {
-            Object res = method.invoke(server, applyParamConverter(parameters, Converter.FLAG_ON_TRANSACT));
-            if (reply != null && !oneway) {
-                reply.writeNoException();
-                reply.writeValue(res);
+
+            if (oneway) {
+                //解决防止Binder线程池过载，导致ipc无法正常通信
+                HiExecutor.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            method.invoke(server, applyParamConverter(parameters, Converter.FLAG_ON_TRANSACT));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            } else {
+                Object res = method.invoke(server, applyParamConverter(parameters, Converter.FLAG_ON_TRANSACT));
+                if (reply != null) {
+                    reply.writeNoException();
+                    reply.writeValue(res);
+                }
             }
-        } catch (IllegalAccessException | InvocationTargetException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            if (reply != null && !oneway) {
+            if (reply != null) {
                 reply.writeException(new IllegalStateException(e));
             }
         }
@@ -187,7 +202,7 @@ public final class IPCMethod {
             if (param != null) {
                 switch (flags) {
                     case Converter.FLAG_ON_TRANSACT:
-                        res = IPCBus.getBinderProxy(type, (IBinder) param);
+                        res = IPCBus.queryBinderProxy(type, (IBinder) param);
                         break;
                     case Converter.FLAG_TRANSACT:
                         //作为Server

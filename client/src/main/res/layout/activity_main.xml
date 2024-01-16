@@ -23,4 +23,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="unregister" />
+
+    <Button
+        android:id="@+id/btn_setACState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="setACState" />
+
+
+    <Button
+        android:id="@+id/btn_getACState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="getACState" />
 </LinearLayout>
