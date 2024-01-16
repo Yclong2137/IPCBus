@@ -1,7 +1,8 @@
-#### IPC方案
-1、使用
+## IPCBus方案
+### 1、使用
+##### Client
 ```java
-//Client
+
 //1、初始化
 IPCBus.initialize(new IServerCache() {
 
@@ -48,7 +49,10 @@ void test(){
 }
 
 
-//Server
+```
+
+Server
+```java
 //1、初始化
 IPCBus.register(IActivityManager.class, new IActivityManager() {
             @Override
@@ -86,10 +90,11 @@ private static class ServiceFetcher extends IServiceFetcher.Stub {
 
     }
 ```
-2、特性
+### 2、特性
 
 * 对oneway功能的支持
 * 接口删除或顺序变动导致的错误支持输出提示
 * 反注册功能的支持
 * 服务断连后自动重新获取服务功能
 * 支持方法重载
+* 对接口统一管理（输入方法参数以及返回值等。。。）
