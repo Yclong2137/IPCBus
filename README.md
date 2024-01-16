@@ -98,3 +98,6 @@ private static class ServiceFetcher extends IServiceFetcher.Stub {
 * 服务断连后自动重新获取服务功能
 * 支持方法重载
 * 对接口统一管理（输入方法参数以及返回值等。。。）
+
+### 3、todo
+* 对in、out、inout实现
