@@ -6,6 +6,9 @@ import android.os.RemoteException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+/**
+ * @author Yclong
+ */
 public final class IPCInvocationBridge implements InvocationHandler {
 
     private final ServerInterface serverInterface;

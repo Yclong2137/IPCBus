@@ -2,7 +2,9 @@ package com.ycl.ipc.bus;
 
 import android.os.IBinder;
 
-
+/**
+ * @author Yclong
+ */
 public interface IServerCache {
 
     default void addBinderStub(String serverName, IBinder binder) {

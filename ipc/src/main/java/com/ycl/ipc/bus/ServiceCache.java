@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * @author Yclong
+ */
 public class ServiceCache {
 
     private static final Map<String, IBinder> sCache = new ArrayMap<>(5);

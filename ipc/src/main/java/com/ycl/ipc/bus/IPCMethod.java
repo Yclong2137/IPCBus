@@ -14,7 +14,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-
+/**
+ * @author Yclong
+ */
 public final class IPCMethod {
 
     private final int code;

@@ -7,7 +7,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * @author Yclong
+ */
 public final class ServerInterface {
 
     private final Class<?> interfaceClass;

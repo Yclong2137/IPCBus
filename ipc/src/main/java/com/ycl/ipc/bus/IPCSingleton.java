@@ -1,6 +1,9 @@
 package com.ycl.ipc.bus;
 
-
+/**
+ * @param <T>
+ * @author Yclong
+ */
 public final class IPCSingleton<T> {
 
     private final Class<?> ipcClass;

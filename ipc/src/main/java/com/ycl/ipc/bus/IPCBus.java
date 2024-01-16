@@ -8,6 +8,8 @@ import java.lang.reflect.Proxy;
 
 /**
  * IPC总线
+ *
+ * @author Yclong
  */
 public final class IPCBus {
 

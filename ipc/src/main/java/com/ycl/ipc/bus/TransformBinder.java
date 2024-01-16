@@ -4,7 +4,9 @@ import android.os.Binder;
 import android.os.Parcel;
 import android.os.RemoteException;
 
-
+/**
+ * @author Yclong
+ */
 public final class TransformBinder extends Binder {
 
     private final ServerInterface serverInterface;
