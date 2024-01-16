@@ -1,4 +1,4 @@
-## IPCBus方案
+## IPCBus（无aidl实现）
 ### 1、使用
 ##### Client
 ```java
