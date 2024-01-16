@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * 反注册
+ *
+ * @author Yclong
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

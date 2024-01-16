@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * 单项调用
+ *
+ * @author Yclong
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
