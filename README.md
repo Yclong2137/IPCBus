@@ -1,6 +1,6 @@
 ## IPCBus（无aidl实现）
 
-### 1、普通IPC通信痛点
+### 1、普通IPC通信
 
 * 需要编写aidl文件
 * 无法重载
@@ -28,16 +28,16 @@
 //1、初始化
 IPCBus.initialize(new IServerCache() {
 
-
             @Override
-            public IBinder queryBinderProxy(String serverName) {
+            public IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
+                if (IServiceFetcher.class == interfaceClass) {
+                    return ServiceManagerNative.getServiceFetcherBinder();
+                }
                 return ServiceManagerNative.getService(serverName);
             }
 
 
-        });
-
-
+});
 //2、使用
 IPCSingleton<IActivityManager> singleton = new IPCSingleton<>(IActivityManager.class);
 
@@ -77,7 +77,17 @@ iActivityManager.unregister(iCarListener);
 Server
 ```java
 
-//1、注册服务
+//初始化
+IPCBus.initialize(new IServerCache() {
+
+            @Override
+            public IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
+                return null;
+            }
+            
+        });
+
+//注册服务
 IPCBus.register(IActivityManager.class, new IActivityManager() {
             ...
         });
