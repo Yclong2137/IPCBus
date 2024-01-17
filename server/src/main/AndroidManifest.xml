@@ -22,8 +22,7 @@
         <provider
             android:name=".BinderProvider"
             android:authorities="${applicationId}.virtual.service.BinderProvider"
-            android:exported="true"
-            android:process=":x" />
+            android:exported="true" />
     </application>
 
 </manifest>

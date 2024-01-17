@@ -8,8 +8,10 @@ import android.util.Log;
 
 import androidx.core.app.BundleCompat;
 
-import com.ycl.ipc.IServiceFetcher;
+import com.ycl.ipc.bus.IPCBus;
+import com.ycl.ipc.bus.IPCSingleton;
 import com.ycl.ipc.client.ipc.ProviderCall;
+import com.ycl.sdk_base.IServiceFetcher;
 
 public class ServiceManagerNative {
 
@@ -19,19 +21,17 @@ public class ServiceManagerNative {
 
     private static IServiceFetcher sFetcher;
 
-    private static IServiceFetcher getServiceFetcher() {
-        if (sFetcher == null || !sFetcher.asBinder().isBinderAlive()) {
-            synchronized (ServiceManagerNative.class) {
-                Context context = App.getInstance();
-                Bundle response = new ProviderCall.Builder(context, SERVICE_CP_AUTH).methodName("@").call();
-                if (response != null) {
-                    IBinder binder = BundleCompat.getBinder(response, "_VA_|_binder_");
-                    linkBinderDied(binder);
-                    sFetcher = IServiceFetcher.Stub.asInterface(binder);
-                }
+    static IPCSingleton<IServiceFetcher> singleton = new IPCSingleton<>(IServiceFetcher.class);
+
+    public static IBinder getServiceFetcherBinder() {
+        synchronized (ServiceManagerNative.class) {
+            Context context = App.getInstance();
+            Bundle response = new ProviderCall.Builder(context, SERVICE_CP_AUTH).methodName("@").call();
+            if (response != null) {
+                return BundleCompat.getBinder(response, "_VA_|_binder_");
             }
         }
-        return sFetcher;
+        return null;
     }
 
 
@@ -44,6 +44,7 @@ public class ServiceManagerNative {
             @Override
             public void binderDied() {
                 binder.unlinkToDeath(this, 0);
+                sFetcher = null;
             }
         };
         try {
@@ -54,13 +55,10 @@ public class ServiceManagerNative {
     }
 
     public static IBinder getService(String name) {
-        IServiceFetcher fetcher = getServiceFetcher();
+        IBinder binder = getServiceFetcherBinder();
+        IServiceFetcher fetcher = singleton.get(binder);
         if (fetcher != null) {
-            try {
-                return fetcher.getService(name);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+            return fetcher.getService(name);
         }
         Log.e(TAG, "GetService(%s) return null.");
         return null;

@@ -27,7 +27,10 @@ public final class IPCInvocationBridge implements InvocationHandler {
             return method.invoke(this, args);
         }
         if (binder == null) {
-            binder = IPCBus.queryBinderProxy(serverInterface.getInterfaceName());
+            binder = IPCBus.queryBinderProxy(serverInterface.getInterfaceClass(), serverInterface.getInterfaceName());
+        }
+        if (binder == null) {
+            throw new IllegalStateException("Can not found the binder : " + method.getDeclaringClass().getName() + "@" + method.getName());
         }
         //兼容IInterface
         if ("asBinder".equals(method.getName())) {

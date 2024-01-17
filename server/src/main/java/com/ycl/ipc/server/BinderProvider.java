@@ -6,17 +6,20 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.core.app.BundleCompat;
 
-import com.ycl.ipc.IServiceFetcher;
+import com.ycl.ipc.IPCTransactHandler;
 import com.ycl.ipc.bus.IPCBus;
 import com.ycl.ipc.bus.RemoteCallbackListExt;
 import com.ycl.sdk_base.IActivityManager;
 import com.ycl.sdk_base.ICarListener;
+import com.ycl.sdk_base.IServiceFetcher;
 import com.ycl.sdk_base.bean.VideoViewAngleData;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 
 public final class BinderProvider extends ContentProvider {
@@ -29,10 +32,21 @@ public final class BinderProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        IPCBus.addIPCTransactHandler(new IPCTransactHandler() {
+            @Override
+            public void onActionStart(Method method, Object[] args) {
+                Log.i(TAG, "onActionStart() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "]");
+            }
+
+            @Override
+            public void onActionEnd(Method method, Object[] args, Object result) {
+                Log.i(TAG, "onActionEnd() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "], result = [" + result + "]");
+            }
+        });
+        IPCBus.register(IServiceFetcher.class, mServiceFetcher);
         IPCBus.register(IActivityManager.class, new IActivityManager() {
             @Override
             public String getPackageName(int a, VideoViewAngleData data) {
-                Log.i(TAG, "getPackageName() called with: a = [" + a + "], data = [" + data + "]");
                 callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
                     @Override
                     public void invokeItem(ICarListener item) {
@@ -44,7 +58,6 @@ public final class BinderProvider extends ContentProvider {
 
             @Override
             public int setACState(int state) {
-                Log.i(TAG, "setACState() called with: state = [" + state + "]");
                 return 1000;
             }
 
@@ -55,18 +68,15 @@ public final class BinderProvider extends ContentProvider {
 
             @Override
             public void register(ICarListener iCarListener) {
-                Log.i(TAG, "register() called with: iCarListener = [" + iCarListener + "]");
                 callbackList.register(iCarListener);
             }
 
             @Override
             public void register(String iCarListener) {
-                Log.i(TAG, "register() called with: iCarListener = [" + iCarListener + "]");
             }
 
             @Override
             public void unregister(ICarListener iCarListener) {
-                Log.i(TAG, "unregister() called with: iCarListener = [" + iCarListener + "]");
                 callbackList.unregister(iCarListener);
             }
         });
@@ -78,7 +88,7 @@ public final class BinderProvider extends ContentProvider {
         Log.i(TAG, "call() called with: method = [" + method + "], arg = [" + arg + "], extras = [" + extras + "]");
         if ("@".equals(method)) {
             Bundle bundle = new Bundle();
-            BundleCompat.putBinder(bundle, "_VA_|_binder_", mServiceFetcher);
+            BundleCompat.putBinder(bundle, "_VA_|_binder_", IPCBus.getBinder(IServiceFetcher.class));
             return bundle;
         }
         if ("register".equals(method)) {
@@ -112,10 +122,9 @@ public final class BinderProvider extends ContentProvider {
         return 0;
     }
 
-    private static class ServiceFetcher extends IServiceFetcher.Stub {
+    private static class ServiceFetcher implements IServiceFetcher {
         @Override
-        public IBinder getService(String name) throws RemoteException {
-            Log.i(TAG, "getService() called with: name = [" + name + "]");
+        public IBinder getService(String name) {
             if (name != null) {
                 return IPCBus.getBinder(name);
             }

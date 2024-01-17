@@ -40,7 +40,7 @@ public final class IPCMethod {
         }
 
         private boolean isInterfaceParam(Class<?> type) {
-            return type.isInterface();
+            return type.isInterface() && !IBinder.class.isAssignableFrom(type);
         }
 
     };
@@ -73,27 +73,30 @@ public final class IPCMethod {
 
     public void handleTransact(Object server, Parcel data, Parcel reply) {
         data.enforceInterface(interfaceName);
-        Object[] parameters = data.readArray(getClass().getClassLoader());
+        final Object[] parameters = applyParamConverter(data.readArray(getClass().getClassLoader()), Converter.FLAG_ON_TRANSACT);
         try {
-
             if (oneway) {
                 //解决防止Binder线程池过载，导致ipc无法正常通信
                 HiExecutor.getInstance().execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            method.invoke(server, applyParamConverter(parameters, Converter.FLAG_ON_TRANSACT));
+                            IPCBus.onActionStart(method, parameters);
+                            method.invoke(server, parameters);
+                            IPCBus.onActionEnd(method, parameters, null);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 });
             } else {
-                Object res = method.invoke(server, applyParamConverter(parameters, Converter.FLAG_ON_TRANSACT));
+                IPCBus.onActionStart(method, parameters);
+                Object res = method.invoke(server, parameters);
                 if (reply != null) {
                     reply.writeNoException();
                     reply.writeValue(res);
                 }
+                IPCBus.onActionEnd(method, parameters, res);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,7 +114,8 @@ public final class IPCMethod {
         boolean status;
         try {
             data.writeInterfaceToken(interfaceName);
-            data.writeArray(applyParamConverter(args, Converter.FLAG_TRANSACT));
+            data.writeArray(args = applyParamConverter(args, Converter.FLAG_TRANSACT));
+            IPCBus.onActionStart(method, args);
             if (oneway) {
                 status = server.transact(code, data, null, Binder.FLAG_ONEWAY);
                 if (handleStatus(status)) return null;
@@ -121,6 +125,7 @@ public final class IPCMethod {
                 reply.readException();
                 result = applyResultConverter(readValue(reply), Converter.FLAG_TRANSACT);
             }
+            IPCBus.onActionEnd(method, args, result);
         } finally {
             data.recycle();
             reply.recycle();

@@ -14,7 +14,7 @@ public class ContentProviderCompat {
         Bundle res = null;
         try {
             res = client.call(method, arg, extras);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             releaseQuietly(client);

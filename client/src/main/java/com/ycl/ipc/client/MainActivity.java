@@ -3,8 +3,6 @@ package com.ycl.ipc.client;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
 import android.view.View;
 
 import com.ycl.ipc.bus.IPCSingleton;
@@ -20,7 +18,6 @@ public class MainActivity extends Activity {
     private ICarListener iCarListener = new ICarListener() {
         @Override
         public void test(int a) {
-            Log.i(TAG, "test() called with: a = [" + a + "]");
         }
     };
 
@@ -32,7 +29,6 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (iActivityManager != null) {
                     VideoViewAngleData data = new VideoViewAngleData();
                     data.id = 1;
@@ -41,7 +37,6 @@ public class MainActivity extends Activity {
                     data.videoSupervisionAVMViewFRes = 4;
                     data.videoSupervisionAVMViewRes = 5;
                     String packageName = iActivityManager.getPackageName(99, data);
-                    System.out.println(">>>>>>>>>>>>> " + packageName);
                 }
             }
         });
@@ -63,7 +58,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn_setACState).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("setACState >>>>>>>>>>>>>>>>> " + iActivityManager.setACState(88888));
+                iActivityManager.setACState(88888);
 
             }
         });
@@ -71,7 +66,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn_getACState).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("getACState >>>>>>>>>>>>>>>>> " + iActivityManager.getACState());
+                iActivityManager.getACState();
             }
         });
     }

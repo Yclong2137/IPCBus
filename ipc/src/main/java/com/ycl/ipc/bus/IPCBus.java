@@ -4,7 +4,12 @@ package com.ycl.ipc.bus;
 import android.os.IBinder;
 import android.os.IInterface;
 
+import com.ycl.ipc.IPCTransactHandler;
+
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * IPC总线
@@ -15,6 +20,7 @@ public final class IPCBus {
 
     private static IServerCache sCache;
 
+    private static final Set<IPCTransactHandler> ipcTransactHandlers = new HashSet<>();
 
     public static void initialize(IServerCache cache) {
         System.out.println("IPCBus.initialize " + cache);
@@ -40,7 +46,7 @@ public final class IPCBus {
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         IBinder binder = delegate;
         if (binder == null) {
-            binder = sCache.queryBinderProxy(serverInterface.getInterfaceName());
+            binder = sCache.queryBinderProxy(interfaceClass, serverInterface.getInterfaceName());
         }
         if (binder == null) {
             return null;
@@ -53,8 +59,8 @@ public final class IPCBus {
         return queryBinderProxyInstance(interfaceClass, null);
     }
 
-    static IBinder queryBinderProxy(String serverName) {
-        return sCache.queryBinderProxy(serverName);
+    static IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
+        return sCache.queryBinderProxy(interfaceClass, serverName);
     }
 
     public static IBinder getBinder(Class<?> interfaceClass) {
@@ -73,6 +79,35 @@ public final class IPCBus {
 
     static void removeBinderByServer(Object server) {
         sCache.removeBinderByServer(server);
+    }
+
+    public static void addIPCTransactHandler(IPCTransactHandler handler) {
+        ipcTransactHandlers.add(handler);
+    }
+
+    public static void removeIPCTransactHandler(IPCTransactHandler handler) {
+        ipcTransactHandlers.remove(handler);
+    }
+
+    static void onActionStart(Method method, Object[] args) {
+        try {
+            for (IPCTransactHandler ipcTransactHandler : ipcTransactHandlers) {
+                if (ipcTransactHandler != null) ipcTransactHandler.onActionStart(method, args);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void onActionEnd(Method method, Object[] args, Object result) {
+        try {
+            for (IPCTransactHandler ipcTransactHandler : ipcTransactHandlers) {
+                if (ipcTransactHandler != null)
+                    ipcTransactHandler.onActionEnd(method, args, result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

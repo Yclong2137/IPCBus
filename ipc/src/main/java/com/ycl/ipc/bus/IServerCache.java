@@ -23,5 +23,5 @@ public interface IServerCache {
         ServiceCache.removeBinderByServer(server);
     }
 
-    IBinder queryBinderProxy(String serverName);
+    IBinder queryBinderProxy(Class<?> interfaceClass, String serverName);
 }
