@@ -23,5 +23,12 @@ public interface IServerCache {
         ServiceCache.removeBinderByServer(server);
     }
 
+    /**
+     * 查询对端服务的代理BinderProxy
+     *
+     * @param interfaceClass 接口类
+     * @param serverName     服务名称（对应 {@linkplain Class#getName() interfaceClass的名称}）
+     * @return BinderProxy对象
+     */
     IBinder queryBinderProxy(Class<?> interfaceClass, String serverName);
 }

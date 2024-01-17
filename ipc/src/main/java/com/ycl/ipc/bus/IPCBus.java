@@ -22,6 +22,11 @@ public final class IPCBus {
 
     private static final Set<IPCTransactHandler> ipcTransactHandlers = new HashSet<>();
 
+    /**
+     * 初始化
+     *
+     * @param cache cache
+     */
     public static void initialize(IServerCache cache) {
         System.out.println("IPCBus.initialize " + cache);
         sCache = cache;
@@ -33,7 +38,12 @@ public final class IPCBus {
         }
     }
 
-
+    /**
+     * 注册服务
+     *
+     * @param interfaceClass 接口类
+     * @param server         该接口的实现类
+     */
     public static synchronized void register(Class<?> interfaceClass, Object server) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
@@ -81,10 +91,20 @@ public final class IPCBus {
         sCache.removeBinderByServer(server);
     }
 
+    /**
+     * 添加IPC处理器
+     *
+     * @param handler
+     */
     public static void addIPCTransactHandler(IPCTransactHandler handler) {
         ipcTransactHandlers.add(handler);
     }
 
+    /**
+     * 移除IPC处理器
+     *
+     * @param handler
+     */
     public static void removeIPCTransactHandler(IPCTransactHandler handler) {
         ipcTransactHandlers.remove(handler);
     }

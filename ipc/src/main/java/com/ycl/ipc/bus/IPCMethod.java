@@ -118,10 +118,10 @@ public final class IPCMethod {
             IPCBus.onActionStart(method, args);
             if (oneway) {
                 status = server.transact(code, data, null, Binder.FLAG_ONEWAY);
-                if (handleStatus(status)) return null;
+                handleStatus(status);
             } else {
                 status = server.transact(code, data, reply, 0);
-                if (handleStatus(status)) return null;
+                handleStatus(status);
                 reply.readException();
                 result = applyResultConverter(readValue(reply), Converter.FLAG_TRANSACT);
             }
@@ -133,13 +133,11 @@ public final class IPCMethod {
         return result;
     }
 
-    private boolean handleStatus(boolean status) {
+    private void handleStatus(boolean status) {
         if (!status) {
             final String msg = "method " + method.getName() + " occur error, the transaction code(" + code + ") was not understood!!!";
-            new IllegalStateException(msg).printStackTrace();
-            return true;
+            throw new IllegalStateException(msg);
         }
-        return false;
     }
 
     private Object readValue(Parcel replay) {
