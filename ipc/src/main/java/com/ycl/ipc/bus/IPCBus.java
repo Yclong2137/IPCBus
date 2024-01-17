@@ -32,10 +32,10 @@ public final class IPCBus {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);
-        sCache.addBinderStub(serverInterface.getInterfaceName(), binder);
+        sCache.addBinder(binder);
     }
 
-    public static <T> T queryBinderProxy(Class<?> interfaceClass, IBinder delegate) {
+    static <T> T queryBinderProxyInstance(Class<?> interfaceClass, IBinder delegate) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         IBinder binder = delegate;
@@ -49,26 +49,30 @@ public final class IPCBus {
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
     }
 
-    public static <T> T queryBinderProxy(Class<?> interfaceClass) {
-        return queryBinderProxy(interfaceClass, null);
+    static <T> T queryBinderProxyInstance(Class<?> interfaceClass) {
+        return queryBinderProxyInstance(interfaceClass, null);
     }
 
     static IBinder queryBinderProxy(String serverName) {
         return sCache.queryBinderProxy(serverName);
     }
 
-    public static IBinder getBinderStub(Class<?> interfaceClass) {
-        return getBinderStub(interfaceClass.getName());
+    public static IBinder getBinder(Class<?> interfaceClass) {
+        return getBinder(interfaceClass.getName());
 
     }
 
-    public static IBinder getBinderStub(String name) {
-        return sCache.getBinderStub(name);
+    public static IBinder getBinder(String name) {
+        return sCache.getBinder(name);
 
     }
 
-    static IBinder getBinder(Object server) {
-        return sCache.getBinderStubByServer(server);
+    static IBinder getBinderByServer(Object server) {
+        return sCache.getBinderByServer(server);
+    }
+
+    static void removeBinderByServer(Object server) {
+        sCache.removeBinderByServer(server);
     }
 
 }

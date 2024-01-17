@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 单项调用
+ * 单向调用
  *
  * @author Yclong
  */

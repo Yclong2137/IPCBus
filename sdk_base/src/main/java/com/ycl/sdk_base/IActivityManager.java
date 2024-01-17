@@ -14,6 +14,7 @@ public interface IActivityManager {
 
     @Oneway
     void register(ICarListener iCarListener);
+    void register(String iCarListener);
 
     @Unsubscribe
     @Oneway

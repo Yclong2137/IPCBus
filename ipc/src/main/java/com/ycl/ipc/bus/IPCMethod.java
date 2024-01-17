@@ -204,15 +204,18 @@ public final class IPCMethod {
             if (param != null) {
                 switch (flags) {
                     case Converter.FLAG_ON_TRANSACT:
-                        res = IPCBus.queryBinderProxy(type, (IBinder) param);
+                        res = IPCBus.queryBinderProxyInstance(type, (IBinder) param);
                         break;
                     case Converter.FLAG_TRANSACT:
                         //作为Server
-                        IBinder binder = IPCBus.getBinder(param);
+                        IBinder binder = IPCBus.getBinderByServer(param);
                         if (binder == null && !unsubscribe) {
                             IPCBus.register(type, param);
                         }
-                        res = IPCBus.getBinder(param);
+                        res = IPCBus.getBinderByServer(param);
+                        if (unsubscribe) {
+                            IPCBus.removeBinderByServer(param);
+                        }
                         break;
                 }
             }

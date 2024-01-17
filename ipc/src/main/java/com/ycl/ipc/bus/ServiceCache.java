@@ -1,39 +1,63 @@
 package com.ycl.ipc.bus;
 
-import android.os.IBinder;
-import android.util.ArrayMap;
-
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Yclong
  */
-public class ServiceCache {
-
-    private static final Map<String, IBinder> sCache = new ArrayMap<>(5);
-
-    private static final Set<IBinder> binderSet = new HashSet<>();
+class ServiceCache {
 
 
-    public static void addService(String name, IBinder service) {
-        sCache.put(name, service);
-        binderSet.add(service);
+    private static final Set<TransformBinder> sBinderRegistry = new HashSet<>();
+
+
+    static void addService(TransformBinder service) {
+        sBinderRegistry.add(service);
     }
 
 
-    public static IBinder getService(String name) {
-        return sCache.get(name);
+    static TransformBinder getService(String name) {
+        return getBinder(new Predicate() {
+            @Override
+            public boolean test(TransformBinder transformBinder) {
+                return name != null && name.equals(transformBinder.getInterfaceName());
+            }
+        });
     }
 
-    public static IBinder getServiceByServer(Object server) {
-        for (IBinder binder : binderSet) {
-            if (binder instanceof TransformBinder && server == ((TransformBinder) binder).getServer()) {
+    static TransformBinder getServiceByServer(Object server) {
+        return getBinder(new Predicate() {
+            @Override
+            public boolean test(TransformBinder transformBinder) {
+                return server == transformBinder.getServer();
+            }
+        });
+    }
+
+    static void removeBinderByServer(Object server) {
+        TransformBinder binder = getServiceByServer(server);
+        if (binder != null) {
+            sBinderRegistry.remove(binder);
+        }
+    }
+
+
+    private static TransformBinder getBinder(Predicate predicate) {
+        for (TransformBinder binder : sBinderRegistry) {
+            if (binder != null && predicate != null && predicate.test(binder)) {
                 return binder;
             }
         }
         return null;
     }
+
+
+    public interface Predicate {
+
+        boolean test(TransformBinder transformBinder);
+
+    }
+
 
 }

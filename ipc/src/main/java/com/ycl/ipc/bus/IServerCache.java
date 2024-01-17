@@ -7,16 +7,20 @@ import android.os.IBinder;
  */
 public interface IServerCache {
 
-    default void addBinderStub(String serverName, IBinder binder) {
-        ServiceCache.addService(serverName, binder);
+    default void addBinder(TransformBinder binder) {
+        ServiceCache.addService(binder);
     }
 
-    default IBinder getBinderStub(String serverName) {
+    default IBinder getBinder(String serverName) {
         return ServiceCache.getService(serverName);
     }
 
-    default IBinder getBinderStubByServer(Object server) {
+    default IBinder getBinderByServer(Object server) {
         return ServiceCache.getServiceByServer(server);
+    }
+
+    default void removeBinderByServer(Object server) {
+        ServiceCache.removeBinderByServer(server);
     }
 
     IBinder queryBinderProxy(String serverName);

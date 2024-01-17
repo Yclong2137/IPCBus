@@ -60,6 +60,11 @@ public final class BinderProvider extends ContentProvider {
             }
 
             @Override
+            public void register(String iCarListener) {
+                Log.i(TAG, "register() called with: iCarListener = [" + iCarListener + "]");
+            }
+
+            @Override
             public void unregister(ICarListener iCarListener) {
                 Log.i(TAG, "unregister() called with: iCarListener = [" + iCarListener + "]");
                 callbackList.unregister(iCarListener);
@@ -112,7 +117,7 @@ public final class BinderProvider extends ContentProvider {
         public IBinder getService(String name) throws RemoteException {
             Log.i(TAG, "getService() called with: name = [" + name + "]");
             if (name != null) {
-                return IPCBus.getBinderStub(name);
+                return IPCBus.getBinder(name);
             }
             return null;
         }
