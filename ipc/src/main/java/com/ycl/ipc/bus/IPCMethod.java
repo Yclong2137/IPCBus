@@ -24,6 +24,7 @@ public final class IPCMethod {
     private final String interfaceName;
     final Class<?>[] parameterTypes;
     final boolean oneway;
+    final boolean unsubscribe;
     private final Converter[] converters;
     private final Converter resultConverter;
 
@@ -33,7 +34,7 @@ public final class IPCMethod {
         @Override
         public Converter get(Class<?> paramType) {
             if (isInterfaceParam(paramType)) {
-                return new InterfaceParamConverter(method, paramType);
+                return new InterfaceParamConverter(paramType);
             }
             return null;
         }
@@ -50,6 +51,7 @@ public final class IPCMethod {
         this.method = method;
         Class<?> returnType = method.getReturnType();
         oneway = method.isAnnotationPresent(Oneway.class) && void.class == returnType;
+        unsubscribe = method.isAnnotationPresent(Unsubscribe.class);
         this.interfaceName = interfaceName;
         parameterTypes = method.getParameterTypes();
         converters = new Converter[parameterTypes.length];
@@ -188,14 +190,12 @@ public final class IPCMethod {
     }
 
 
-    private static class InterfaceParamConverter implements Converter {
+    private class InterfaceParamConverter implements Converter {
 
         private final Class<?> type;
-        private final boolean unsubscribe;
 
-        InterfaceParamConverter(Method method, Class<?> type) {
+        InterfaceParamConverter(Class<?> type) {
             this.type = type;
-            this.unsubscribe = method.isAnnotationPresent(Unsubscribe.class);
         }
 
         @Override
