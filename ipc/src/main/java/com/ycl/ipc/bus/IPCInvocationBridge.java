@@ -7,6 +7,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 /**
+ * IPC Proxy
+ *
  * @author Yclong
  */
 public final class IPCInvocationBridge implements InvocationHandler {

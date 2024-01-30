@@ -3,6 +3,8 @@ package com.ycl.ipc.bus;
 import android.os.IBinder;
 
 /**
+ * 服务缓存
+ *
  * @author Yclong
  */
 public interface IServerCache {

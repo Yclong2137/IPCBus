@@ -15,6 +15,8 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
+ * IPC Method
+ *
  * @author Yclong
  */
 public final class IPCMethod {

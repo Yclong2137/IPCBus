@@ -5,6 +5,8 @@ import android.os.Parcel;
 import android.os.RemoteException;
 
 /**
+ * Binder Stub
+ *
  * @author Yclong
  */
 public final class TransformBinder extends Binder {

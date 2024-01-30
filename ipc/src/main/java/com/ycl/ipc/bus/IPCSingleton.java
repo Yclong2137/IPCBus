@@ -3,6 +3,8 @@ package com.ycl.ipc.bus;
 import android.os.IBinder;
 
 /**
+ * IPCSingleton
+ *
  * @param <T>
  * @author Yclong
  */

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 服务接口
+ *
  * @author Yclong
  */
 public final class ServerInterface {
