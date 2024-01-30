@@ -100,7 +100,7 @@ public final class IPCMethod {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            if (reply != null) {
+            if (reply != null && !oneway) {
                 reply.writeException(new IllegalStateException(e));
             }
         }
