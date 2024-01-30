@@ -19,7 +19,7 @@ public final class IPCSingleton<T> {
         if (instance == null) {
             synchronized (this) {
                 if (instance == null) {
-                    instance = IPCBus.queryBinderProxyInstance(ipcClass, delegate);
+                    instance = IPCBus.queryAndCreateBinderProxyInstance(ipcClass, delegate);
                 }
             }
         }

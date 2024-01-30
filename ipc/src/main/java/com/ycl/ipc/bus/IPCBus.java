@@ -41,17 +41,25 @@ public final class IPCBus {
     /**
      * 注册服务
      *
-     * @param interfaceClass 接口类
-     * @param server         该接口的实现类
+     * @param interfaceClass 服务接口
+     * @param server         服务接口实现类
      */
-    public static synchronized void register(Class<?> interfaceClass, Object server) {
+    public static void register(Class<?> interfaceClass, Object server) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);
         sCache.addBinder(binder);
     }
 
-    static <T> T queryBinderProxyInstance(Class<?> interfaceClass, IBinder delegate) {
+    /**
+     * 查询并创建BinderProxy实例
+     *
+     * @param interfaceClass 服务接口
+     * @param delegate       Binder委托
+     * @param <T>
+     * @return BinderProxy实例
+     */
+    static <T> T queryAndCreateBinderProxyInstance(Class<?> interfaceClass, IBinder delegate) {
         checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         IBinder binder = delegate;
@@ -65,28 +73,65 @@ public final class IPCBus {
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
     }
 
-    static <T> T queryBinderProxyInstance(Class<?> interfaceClass) {
-        return queryBinderProxyInstance(interfaceClass, null);
+    /**
+     * 查询并创建BinderProxy实例
+     *
+     * @param interfaceClass 服务接口
+     * @param <T>
+     * @return BinderProxy实例
+     */
+    static <T> T queryAndCreateBinderProxyInstance(Class<?> interfaceClass) {
+        return queryAndCreateBinderProxyInstance(interfaceClass, null);
     }
 
+    /**
+     * 查询对端BinderProxy
+     *
+     * @param interfaceClass 服务接口
+     * @param serverName     服务名称
+     * @return BinderProxy
+     */
     static IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
         return sCache.queryBinderProxy(interfaceClass, serverName);
     }
 
+    /**
+     * 获取Binder
+     *
+     * @param interfaceClass 服务接口
+     * @return Binder
+     */
     public static IBinder getBinder(Class<?> interfaceClass) {
         return getBinder(interfaceClass.getName());
 
     }
 
+    /**
+     * 获取Binder
+     *
+     * @param name 服务名称
+     * @return Binder
+     */
     public static IBinder getBinder(String name) {
         return sCache.getBinder(name);
 
     }
 
+    /**
+     * 通过服务实例获取Binder
+     *
+     * @param server 服务实例
+     * @return Binder
+     */
     static IBinder getBinderByServer(Object server) {
         return sCache.getBinderByServer(server);
     }
 
+    /**
+     * 通过服务实例移除Binder
+     *
+     * @param server 服务实例
+     */
     static void removeBinderByServer(Object server) {
         sCache.removeBinderByServer(server);
     }

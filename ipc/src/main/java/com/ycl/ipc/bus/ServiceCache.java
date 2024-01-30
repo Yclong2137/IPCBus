@@ -1,7 +1,7 @@
 package com.ycl.ipc.bus;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author Yclong
@@ -9,7 +9,7 @@ import java.util.Set;
 class ServiceCache {
 
 
-    private static final Set<TransformBinder> sBinderRegistry = new HashSet<>();
+    private static final Set<TransformBinder> sBinderRegistry = new CopyOnWriteArraySet<>();
 
 
     static void addService(TransformBinder service) {

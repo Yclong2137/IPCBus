@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.library'
 }
+apply plugin: 'maven-publish'
+
 
 android {
     compileSdkVersion 33
@@ -28,4 +30,33 @@ android {
 }
 
 dependencies {
+}
+
+// 上传源码的 task
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier.set("sources")
+}
+
+//发布前先执行 clean, 避免发布的aar中使用了旧的缓存代码
+publish.dependsOn clean
+
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'com.ycl.ipc'
+                artifactId = 'ipc-bus'
+                version = '0.0.1'
+                //上传源码
+                artifact sourceJar
+
+                from components.release
+            }
+        }
+
+        repositories {
+            mavenLocal()
+        }
+    }
 }

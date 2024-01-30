@@ -207,7 +207,7 @@ public final class IPCMethod {
             if (param != null) {
                 switch (flags) {
                     case Converter.FLAG_ON_TRANSACT:
-                        res = IPCBus.queryBinderProxyInstance(type, (IBinder) param);
+                        res = IPCBus.queryAndCreateBinderProxyInstance(type, (IBinder) param);
                         break;
                     case Converter.FLAG_TRANSACT:
                         //作为Server

@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
 
     IPCSingleton<IActivityManager> singleton = new IPCSingleton<>(IActivityManager.class);
     private static final String TAG = ">>>>>>>>>>";
-
+    IActivityManager iActivityManager;
     private ICarListener iCarListener = new ICarListener() {
         @Override
         public void test(int a) {
@@ -25,11 +25,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        IActivityManager iActivityManager = singleton.get();
+         iActivityManager = singleton.get();
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (iActivityManager != null) {
+                if ((iActivityManager = singleton.get()) != null) {
                     VideoViewAngleData data = new VideoViewAngleData();
                     data.id = 1;
                     data.retCode = 2;

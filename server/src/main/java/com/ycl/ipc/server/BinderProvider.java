@@ -44,42 +44,42 @@ public final class BinderProvider extends ContentProvider {
             }
         });
         IPCBus.register(IServiceFetcher.class, mServiceFetcher);
-        IPCBus.register(IActivityManager.class, new IActivityManager() {
-            @Override
-            public String getPackageName(int a, VideoViewAngleData data) {
-                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
-                    @Override
-                    public void invokeItem(ICarListener item) {
-                        item.test(3333);
-                    }
-                });
-                return "这是测试包名";
-            }
-
-            @Override
-            public int setACState(int state) {
-                return 1000;
-            }
-
-            @Override
-            public int getACState() {
-                return 2000;
-            }
-
-            @Override
-            public void register(ICarListener iCarListener) {
-                callbackList.register(iCarListener);
-            }
-
-            @Override
-            public void register(String iCarListener) {
-            }
-
-            @Override
-            public void unregister(ICarListener iCarListener) {
-                callbackList.unregister(iCarListener);
-            }
-        });
+//        IPCBus.register(IActivityManager.class, new IActivityManager() {
+//            @Override
+//            public String getPackageName(int a, VideoViewAngleData data) {
+//                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
+//                    @Override
+//                    public void invokeItem(ICarListener item) {
+//                        item.test(3333);
+//                    }
+//                });
+//                return "这是测试包名";
+//            }
+//
+//            @Override
+//            public int setACState(int state) {
+//                return 1000;
+//            }
+//
+//            @Override
+//            public int getACState() {
+//                return 2000;
+//            }
+//
+//            @Override
+//            public void register(ICarListener iCarListener) {
+//                callbackList.register(iCarListener);
+//            }
+//
+//            @Override
+//            public void register(String iCarListener) {
+//            }
+//
+//            @Override
+//            public void unregister(ICarListener iCarListener) {
+//                callbackList.unregister(iCarListener);
+//            }
+//        });
         return true;
     }
 
