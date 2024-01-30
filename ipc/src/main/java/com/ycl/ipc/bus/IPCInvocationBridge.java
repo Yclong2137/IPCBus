@@ -1,7 +1,6 @@
 package com.ycl.ipc.bus;
 
 import android.os.IBinder;
-import android.os.RemoteException;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -56,8 +55,8 @@ public final class IPCInvocationBridge implements InvocationHandler {
             }
         };
         try {
-            binder.linkToDeath(deathRecipient, 0);
-        } catch (RemoteException e) {
+            if (binder != null) binder.linkToDeath(deathRecipient, 0);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

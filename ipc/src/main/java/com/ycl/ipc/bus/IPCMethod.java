@@ -12,6 +12,7 @@ import com.ycl.ipc.annotation.Unsubscribe;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -42,7 +43,19 @@ public final class IPCMethod {
         }
 
         private boolean isInterfaceParam(Class<?> type) {
-            return type.isInterface() && !IBinder.class.isAssignableFrom(type);
+            if (type.isInterface()) {
+                if (IBinder.class.isAssignableFrom(type)) {
+                    return false;
+                }
+                if (Iterable.class.isAssignableFrom(type)) {
+                    return false;
+                }
+                if (Map.class.isAssignableFrom(type)) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
 
     };

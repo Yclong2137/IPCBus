@@ -66,9 +66,6 @@ public final class IPCBus {
         if (binder == null) {
             binder = sCache.queryBinderProxy(interfaceClass, serverInterface.getInterfaceName());
         }
-        if (binder == null) {
-            return null;
-        }
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
     }
