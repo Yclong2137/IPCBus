@@ -32,6 +32,23 @@ android {
 dependencies {
 }
 
+//maven私服账户名
+def nexusUserName
+//maven私服密码
+def nexusPassword
+
+def SNAPSHOT_REPOSITORY_URL
+
+Properties properties = new Properties()
+try {
+    properties.load(new File(rootDir, "local.properties").newDataInputStream())
+    nexusUserName = properties.getProperty("NEXUS_USERNAME")
+    nexusPassword = properties.getProperty("NEXUS_PASSWORD")
+    SNAPSHOT_REPOSITORY_URL = properties.getProperty("SNAPSHOT_REPOSITORY_URL")
+} catch (Exception e) {
+    e.printStackTrace()
+}
+
 // 上传源码的 task
 task sourceJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -47,7 +64,7 @@ afterEvaluate {
             maven(MavenPublication) {
                 groupId = 'com.ycl.ipc'
                 artifactId = 'ipc-bus'
-                version = '0.0.1'
+                version = '0.0.1-SNAPSHOT'
                 //上传源码
                 artifact sourceJar
 
@@ -57,6 +74,15 @@ afterEvaluate {
 
         repositories {
             mavenLocal()
+            maven {
+                name = "Qisi"
+                url = SNAPSHOT_REPOSITORY_URL
+
+                credentials {
+                    username nexusUserName
+                    password nexusPassword
+                }
+            }
         }
     }
 }
