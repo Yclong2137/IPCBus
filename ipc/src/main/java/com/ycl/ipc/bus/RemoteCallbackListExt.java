@@ -24,7 +24,7 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
     private final T mCallback;
 
     public RemoteCallbackListExt(@NonNull Class<T> interfaceClass) {
-        if (interfaceClass.isInterface()) {
+        if (!interfaceClass.isInterface()) {
             throw new IllegalArgumentException(interfaceClass + " not an interface, please check.");
         }
         mCallback = (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler() {

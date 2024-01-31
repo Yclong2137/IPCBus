@@ -8,7 +8,6 @@ import android.util.Log;
 
 import androidx.core.app.BundleCompat;
 
-import com.ycl.ipc.bus.IPCBus;
 import com.ycl.ipc.bus.IPCSingleton;
 import com.ycl.ipc.client.ipc.ProviderCall;
 import com.ycl.sdk_base.IServiceFetcher;

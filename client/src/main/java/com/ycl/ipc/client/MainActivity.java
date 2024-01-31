@@ -43,7 +43,12 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn_register).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                iActivityManager.register(iCarListener);
+                iActivityManager.register(new ICarListener() {
+                    @Override
+                    public void test(int a) {
+
+                    }
+                });
                 iActivityManager.register("iCarListener");
             }
         });
