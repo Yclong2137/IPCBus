@@ -13,11 +13,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public interface IServerCache {
 
 
-    List<TransformBinder> sBinderRegistry = new CopyOnWriteArrayList<>();
+    List<TransformBinder> REGISTRY = new CopyOnWriteArrayList<>();
 
 
     default void addBinder(TransformBinder binder) {
-        sBinderRegistry.add(binder);
+        REGISTRY.add(binder);
     }
 
     default boolean isExist(Class<?> interfaceClass, Object server) {
@@ -25,7 +25,7 @@ public interface IServerCache {
     }
 
     default IBinder getBinder(String serverName) {
-        for (TransformBinder binder : sBinderRegistry) {
+        for (TransformBinder binder : REGISTRY) {
             if (serverName != null && serverName.equals(binder.getInterfaceName())) {
                 return binder;
             }
@@ -34,7 +34,7 @@ public interface IServerCache {
     }
 
     default IBinder getBinder(Class<?> interfaceClass, Object server) {
-        for (TransformBinder binder : sBinderRegistry) {
+        for (TransformBinder binder : REGISTRY) {
             if (binder.getInterfaceClass() == interfaceClass && binder.getServer() == server) {
                 return binder;
             }
@@ -43,11 +43,11 @@ public interface IServerCache {
     }
 
     default void removeBinder(Class<?> interfaceClass, Object server) {
-        for (int len = sBinderRegistry.size(), i = len - 1; i >= 0; i--) {
-            TransformBinder binder = sBinderRegistry.get(i);
+        for (int len = REGISTRY.size(), i = len - 1; i >= 0; i--) {
+            TransformBinder binder = REGISTRY.get(i);
             if (binder == null) continue;
             if (binder.getInterfaceClass() == interfaceClass && binder.getServer() == server) {
-                sBinderRegistry.remove(i);
+                REGISTRY.remove(i);
             }
         }
     }
