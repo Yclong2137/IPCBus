@@ -63,10 +63,10 @@ public final class IPCBus {
      * @return BinderProxy实例
      */
     static <T> T queryAndCreateBinderProxyInstance(Class<?> interfaceClass, IBinder delegate) {
-        checkInitialized();
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         IBinder binder = delegate;
         if (binder == null) {
+            checkInitialized();
             binder = sCache.queryBinderProxy(interfaceClass, serverInterface.getInterfaceName());
         }
         //noinspection unchecked
@@ -82,6 +82,7 @@ public final class IPCBus {
      * @return BinderProxy
      */
     static IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
+        checkInitialized();
         return sCache.queryBinderProxy(interfaceClass, serverName);
     }
 
@@ -103,6 +104,7 @@ public final class IPCBus {
      * @return Binder
      */
     public static IBinder getBinder(String name) {
+        checkInitialized();
         return sCache.getBinder(name);
 
     }
@@ -114,6 +116,7 @@ public final class IPCBus {
      * @return Binder
      */
     static IBinder getBinder(Class<?> interfaceClass, Object server) {
+        checkInitialized();
         return sCache.getBinder(interfaceClass, server);
     }
 
@@ -123,6 +126,7 @@ public final class IPCBus {
      * @param server 服务实例
      */
     static void removeBinder(Class<?> interfaceClass, Object server) {
+        checkInitialized();
         sCache.removeBinder(interfaceClass, server);
     }
 
