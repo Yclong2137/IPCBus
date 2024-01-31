@@ -4,6 +4,9 @@ package com.ycl.ipc.bus;
 import android.os.IBinder;
 import android.os.IInterface;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.ycl.ipc.IPCTransactHandler;
 
 import java.lang.reflect.Method;
@@ -27,7 +30,7 @@ public final class IPCBus {
      *
      * @param cache cache
      */
-    public static void initialize(IServerCache cache) {
+    public static void initialize(@NonNull IServerCache cache) {
         System.out.println("IPCBus.initialize " + cache);
         sCache = cache;
     }
@@ -44,7 +47,7 @@ public final class IPCBus {
      * @param interfaceClass 服务接口
      * @param server         服务接口实现类
      */
-    public static void register(Class<?> interfaceClass, Object server) {
+    public static void register(@NonNull Class<?> interfaceClass, @NonNull Object server) {
         checkInitialized();
         if (sCache.isExist(interfaceClass, server)) {
             return;
@@ -62,7 +65,7 @@ public final class IPCBus {
      * @param <T>
      * @return BinderProxy实例
      */
-    static <T> T queryAndCreateBinderProxyInstance(Class<?> interfaceClass, IBinder delegate) {
+    static <T> T queryAndCreateBinderProxyInstance(@NonNull Class<?> interfaceClass, @Nullable IBinder delegate) {
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         IBinder binder = delegate;
         if (binder == null) {
@@ -81,7 +84,7 @@ public final class IPCBus {
      * @param serverName     服务名称
      * @return BinderProxy
      */
-    static IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
+    static IBinder queryBinderProxy(@NonNull Class<?> interfaceClass, @NonNull String serverName) {
         checkInitialized();
         return sCache.queryBinderProxy(interfaceClass, serverName);
     }
@@ -92,7 +95,7 @@ public final class IPCBus {
      * @param interfaceClass 服务接口
      * @return Binder
      */
-    public static IBinder getBinder(Class<?> interfaceClass) {
+    public static IBinder getBinder(@NonNull Class<?> interfaceClass) {
         return getBinder(interfaceClass.getName());
 
     }
@@ -103,7 +106,7 @@ public final class IPCBus {
      * @param name 服务名称
      * @return Binder
      */
-    public static IBinder getBinder(String name) {
+    public static IBinder getBinder(@NonNull String name) {
         checkInitialized();
         return sCache.getBinder(name);
 
@@ -115,7 +118,7 @@ public final class IPCBus {
      * @param server 服务实例
      * @return Binder
      */
-    static IBinder getBinder(Class<?> interfaceClass, Object server) {
+    static IBinder getBinder(@NonNull Class<?> interfaceClass, @NonNull Object server) {
         checkInitialized();
         return sCache.getBinder(interfaceClass, server);
     }
@@ -125,7 +128,7 @@ public final class IPCBus {
      *
      * @param server 服务实例
      */
-    static void removeBinder(Class<?> interfaceClass, Object server) {
+    static void removeBinder(@NonNull Class<?> interfaceClass,@NonNull Object server) {
         checkInitialized();
         sCache.removeBinder(interfaceClass, server);
     }
@@ -135,7 +138,7 @@ public final class IPCBus {
      *
      * @param handler
      */
-    public static void addIPCTransactHandler(IPCTransactHandler handler) {
+    public static void addIPCTransactHandler(@NonNull IPCTransactHandler handler) {
         ipcTransactHandlers.add(handler);
     }
 
@@ -144,7 +147,7 @@ public final class IPCBus {
      *
      * @param handler
      */
-    public static void removeIPCTransactHandler(IPCTransactHandler handler) {
+    public static void removeIPCTransactHandler(@NonNull IPCTransactHandler handler) {
         ipcTransactHandlers.remove(handler);
     }
 

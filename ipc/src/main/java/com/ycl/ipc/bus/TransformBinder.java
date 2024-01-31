@@ -4,6 +4,8 @@ import android.os.Binder;
 import android.os.Parcel;
 import android.os.RemoteException;
 
+import androidx.annotation.NonNull;
+
 /**
  * Binder Stub
  *
@@ -14,7 +16,7 @@ public final class TransformBinder extends Binder {
     private final ServerInterface serverInterface;
     private final Object server;
 
-    public TransformBinder(ServerInterface serverInterface, Object server) {
+    TransformBinder(@NonNull ServerInterface serverInterface, @NonNull Object server) {
         this.serverInterface = serverInterface;
         this.server = server;
     }

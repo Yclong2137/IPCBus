@@ -72,7 +72,7 @@ public final class IPCMethod {
     };
 
 
-    public IPCMethod(int code, Method method, String interfaceName) {
+    IPCMethod(int code, Method method, String interfaceName) {
         this.code = code;
         this.method = method;
         Class<?> returnType = method.getReturnType();

@@ -18,7 +18,7 @@ public final class ServerInterface {
     private final SparseArray<IPCMethod> codeToInterfaceMethod;
     private final Map<Method, IPCMethod> methodToIPCMethodMap;
 
-    public ServerInterface(Class<?> interfaceClass) {
+    ServerInterface(Class<?> interfaceClass) {
         this.interfaceClass = interfaceClass;
         Method[] methods = interfaceClass.getMethods();
         codeToInterfaceMethod = new SparseArray<>(methods.length);

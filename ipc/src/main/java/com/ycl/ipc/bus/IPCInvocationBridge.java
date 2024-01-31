@@ -2,6 +2,9 @@ package com.ycl.ipc.bus;
 
 import android.os.IBinder;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
@@ -15,7 +18,7 @@ public final class IPCInvocationBridge implements InvocationHandler {
     private final ServerInterface serverInterface;
     private IBinder binder;
 
-    public IPCInvocationBridge(ServerInterface serverInterface, IBinder binder) {
+    IPCInvocationBridge(@NonNull ServerInterface serverInterface, @Nullable IBinder binder) {
         this.serverInterface = serverInterface;
         this.binder = binder;
         linkBinderDied(binder);

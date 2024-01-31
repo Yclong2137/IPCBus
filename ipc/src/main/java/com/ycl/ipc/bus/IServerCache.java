@@ -2,6 +2,8 @@ package com.ycl.ipc.bus;
 
 import android.os.IBinder;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -16,11 +18,11 @@ public interface IServerCache {
     List<TransformBinder> REGISTRY = new CopyOnWriteArrayList<>();
 
 
-    default void addBinder(TransformBinder binder) {
+    default void addBinder(@NonNull TransformBinder binder) {
         REGISTRY.add(binder);
     }
 
-    default boolean isExist(Class<?> interfaceClass, Object server) {
+    default boolean isExist(@NonNull Class<?> interfaceClass,@NonNull Object server) {
         return getBinder(interfaceClass, server) != null;
     }
 

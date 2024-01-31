@@ -28,7 +28,7 @@ public final class BinderProvider extends ContentProvider {
 
     private final ServiceFetcher mServiceFetcher = new ServiceFetcher();
 
-    private final RemoteCallbackListExt<ICarListener> callbackList = new RemoteCallbackListExt<>();
+    private final RemoteCallbackListExt<ICarListener> callbackList = new RemoteCallbackListExt<>(ICarListener.class);
 
     @Override
     public boolean onCreate() {
@@ -47,12 +47,7 @@ public final class BinderProvider extends ContentProvider {
         IPCBus.register(IActivityManager.class, new IActivityManager() {
             @Override
             public String getPackageName(int a, VideoViewAngleData data) {
-                callbackList.call(new RemoteCallbackListExt.ItemCallback<ICarListener>() {
-                    @Override
-                    public void invokeItem(ICarListener item) {
-                        item.test(3333);
-                    }
-                });
+                callbackList.getCallback().test(3333);
                 return "这是测试包名";
             }
 

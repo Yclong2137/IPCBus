@@ -2,6 +2,8 @@ package com.ycl.ipc.bus;
 
 import android.os.IBinder;
 
+import androidx.annotation.Nullable;
+
 /**
  * IPCSingleton
  *
@@ -17,7 +19,7 @@ public final class IPCSingleton<T> {
         this.ipcClass = ipcClass;
     }
 
-    public T get(IBinder delegate) {
+    public T get(@Nullable IBinder delegate) {
         if (instance == null) {
             synchronized (this) {
                 if (instance == null) {
