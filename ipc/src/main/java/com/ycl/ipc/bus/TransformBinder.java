@@ -40,4 +40,8 @@ public final class TransformBinder extends Binder {
     String getInterfaceName() {
         return serverInterface.getInterfaceName();
     }
+
+    Class<?> getInterfaceClass() {
+        return serverInterface.getInterfaceClass();
+    }
 }

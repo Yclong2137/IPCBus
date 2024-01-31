@@ -46,6 +46,9 @@ public final class IPCBus {
      */
     public static void register(Class<?> interfaceClass, Object server) {
         checkInitialized();
+        if (sCache.isExist(interfaceClass, server)) {
+            return;
+        }
         ServerInterface serverInterface = new ServerInterface(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);
         sCache.addBinder(binder);
@@ -70,16 +73,6 @@ public final class IPCBus {
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
     }
 
-    /**
-     * 查询并创建BinderProxy实例
-     *
-     * @param interfaceClass 服务接口
-     * @param <T>
-     * @return BinderProxy实例
-     */
-    static <T> T queryAndCreateBinderProxyInstance(Class<?> interfaceClass) {
-        return queryAndCreateBinderProxyInstance(interfaceClass, null);
-    }
 
     /**
      * 查询对端BinderProxy
@@ -120,8 +113,8 @@ public final class IPCBus {
      * @param server 服务实例
      * @return Binder
      */
-    static IBinder getBinderByServer(Object server) {
-        return sCache.getBinderByServer(server);
+    static IBinder getBinder(Class<?> interfaceClass, Object server) {
+        return sCache.getBinder(interfaceClass, server);
     }
 
     /**
@@ -129,8 +122,8 @@ public final class IPCBus {
      *
      * @param server 服务实例
      */
-    static void removeBinderByServer(Object server) {
-        sCache.removeBinderByServer(server);
+    static void removeBinder(Class<?> interfaceClass, Object server) {
+        sCache.removeBinder(interfaceClass, server);
     }
 
     /**

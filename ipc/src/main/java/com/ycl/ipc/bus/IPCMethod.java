@@ -10,8 +10,10 @@ import com.ycl.ipc.HiExecutor;
 import com.ycl.ipc.annotation.Oneway;
 import com.ycl.ipc.annotation.Unsubscribe;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
@@ -47,10 +49,19 @@ public final class IPCMethod {
                 if (IBinder.class.isAssignableFrom(type)) {
                     return false;
                 }
-                if (Iterable.class.isAssignableFrom(type)) {
+                if (Collection.class.isAssignableFrom(type)) {
                     return false;
                 }
                 if (Map.class.isAssignableFrom(type)) {
+                    return false;
+                }
+                if (Parcelable.class.isAssignableFrom(type)) {
+                    return false;
+                }
+                if (CharSequence.class.isAssignableFrom(type)) {
+                    return false;
+                }
+                if (Serializable.class.isAssignableFrom(type)) {
                     return false;
                 }
                 return true;
@@ -225,14 +236,13 @@ public final class IPCMethod {
                         res = IPCBus.queryAndCreateBinderProxyInstance(type, (IBinder) param);
                         break;
                     case Converter.FLAG_TRANSACT:
-                        //作为Server
-                        IBinder binder = IPCBus.getBinderByServer(param);
-                        if (binder == null && !unsubscribe) {
+                        if (!unsubscribe) {
                             IPCBus.register(type, param);
                         }
-                        res = IPCBus.getBinderByServer(param);
+                        res = IPCBus.getBinder(type, param);
                         if (unsubscribe) {
-                            IPCBus.removeBinderByServer(param);
+                            //防止内存泄漏
+                            IPCBus.removeBinder(type, param);
                         }
                         break;
                 }
