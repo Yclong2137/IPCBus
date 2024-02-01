@@ -6,6 +6,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 
+import androidx.annotation.NonNull;
+
 import com.ycl.ipc.HiExecutor;
 import com.ycl.ipc.annotation.Oneway;
 import com.ycl.ipc.annotation.Unsubscribe;
@@ -13,9 +15,12 @@ import com.ycl.ipc.annotation.Unsubscribe;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+
+import timber.log.Timber;
 
 /**
  * IPC Method
@@ -98,37 +103,45 @@ public final class IPCMethod {
     }
 
     public void handleTransact(Object server, Parcel data, Parcel reply) {
-        data.enforceInterface(interfaceName);
-        final Object[] parameters = applyParamConverter(data.readArray(getClass().getClassLoader()), Converter.FLAG_ON_TRANSACT);
+        Object[] args = null;
         try {
+            data.enforceInterface(interfaceName);
+            final Object[] parameters = applyParamConverter(data.readArray(getClass().getClassLoader()), Converter.FLAG_ON_TRANSACT);
+            args = parameters;
+            IPCBus.onActionStart(method, args);
             if (oneway) {
                 //解决防止Binder线程池过载，导致ipc无法正常通信
                 HiExecutor.getInstance().execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            IPCBus.onActionStart(method, parameters);
                             method.invoke(server, parameters);
-                            IPCBus.onActionEnd(method, parameters, null);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Timber.e(e, "<<<<<<----- %s@%s(%s) called with code = %s occur error. ", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), code);
+                            IPCBus.onError(method, parameters, e);
+                        } finally {
+                            IPCBus.onActionEnd(method, parameters, null);
                         }
                     }
                 });
             } else {
-                IPCBus.onActionStart(method, parameters);
-                Object res = method.invoke(server, parameters);
-                if (reply != null) {
-                    reply.writeNoException();
-                    reply.writeValue(res);
+                Object res = null;
+                try {
+                    res = method.invoke(server, parameters);
+                    if (reply != null) {
+                        reply.writeNoException();
+                        reply.writeValue(res);
+                    }
+                } finally {
+                    IPCBus.onActionEnd(method, parameters, res);
                 }
-                IPCBus.onActionEnd(method, parameters, res);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Timber.e(e, "<<<<<<----- %s@%s(%s) called with code = %s occur error. ", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), code);
             if (reply != null && !oneway) {
                 reply.writeException(new IllegalStateException(e));
             }
+            IPCBus.onError(method, args, e);
         }
     }
 
@@ -136,12 +149,12 @@ public final class IPCMethod {
     public Object callRemote(IBinder server, Object[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
-        Object result = null;
+        Object result = defaultValue(method.getReturnType());
         boolean status;
         try {
+            IPCBus.onActionStart(method, args);
             data.writeInterfaceToken(interfaceName);
             data.writeArray(args = applyParamConverter(args, Converter.FLAG_TRANSACT));
-            IPCBus.onActionStart(method, args);
             if (oneway) {
                 status = server.transact(code, data, null, Binder.FLAG_ONEWAY);
                 handleStatus(status);
@@ -151,12 +164,26 @@ public final class IPCMethod {
                 reply.readException();
                 result = applyResultConverter(readValue(reply), Converter.FLAG_TRANSACT);
             }
-            IPCBus.onActionEnd(method, args, result);
+        } catch (Exception e) {
+            Timber.e(e, "----->>>>>> %s@%s(%s) called with code = %s occur error. ", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), code);
+            IPCBus.onError(method, args, e);
         } finally {
             data.recycle();
             reply.recycle();
+            IPCBus.onActionEnd(method, args, result);
         }
         return result;
+    }
+
+    private Object defaultValue(@NonNull Class<?> returnType) {
+        if (boolean.class == returnType || Boolean.class == returnType) {
+            return false;
+        }
+        if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType)) {
+            // TODO: 2024/2/1 待商榷
+            return -0xff;
+        }
+        return null;
     }
 
     private void handleStatus(boolean status) {

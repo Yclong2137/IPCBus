@@ -31,6 +31,7 @@ android {
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 }
 
 //maven私服账户名

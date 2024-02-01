@@ -3,16 +3,20 @@ package com.ycl.ipc.bus;
 
 import android.os.IBinder;
 import android.os.IInterface;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.ycl.ipc.BuildConfig;
 import com.ycl.ipc.IPCTransactHandler;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Set;
+
+import timber.log.Timber;
 
 /**
  * IPC总线
@@ -31,8 +35,38 @@ public final class IPCBus {
      * @param cache cache
      */
     public static void initialize(@NonNull IServerCache cache) {
-        System.out.println("IPCBus.initialize " + cache);
+        initTimber();
+        Timber.i("initialize %s", cache);
         sCache = cache;
+    }
+
+    private static void initTimber() {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree() {
+                @Override
+                protected void log(int priority, String tag, @NonNull String message, Throwable t) {
+                    super.log(priority, "IPCBus->" + tag, message, t);
+                }
+            });
+        } else {
+            Timber.plant(new Timber.Tree() {
+                @Override
+                protected void log(int priority, @Nullable String tag, @NonNull String message, @Nullable Throwable t) {
+                    if (priority == Log.VERBOSE || priority == Log.DEBUG) {
+                        return;
+                    }
+                    FakeCrashLibrary.log(priority, "IPCBus->" + tag, message);
+
+                    if (t != null) {
+                        if (priority == Log.ERROR) {
+                            FakeCrashLibrary.logError(t);
+                        } else if (priority == Log.WARN) {
+                            FakeCrashLibrary.logWarning(t);
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private static void checkInitialized() {
@@ -49,6 +83,7 @@ public final class IPCBus {
      */
     public static void register(@NonNull Class<?> interfaceClass, @NonNull Object server) {
         checkInitialized();
+        Timber.i("register() called with: interfaceClass = [" + interfaceClass + "], server = [" + server + "]");
         if (sCache.isExist(interfaceClass, server)) {
             return;
         }
@@ -128,7 +163,7 @@ public final class IPCBus {
      *
      * @param server 服务实例
      */
-    static void removeBinder(@NonNull Class<?> interfaceClass,@NonNull Object server) {
+    static void removeBinder(@NonNull Class<?> interfaceClass, @NonNull Object server) {
         checkInitialized();
         sCache.removeBinder(interfaceClass, server);
     }
@@ -169,6 +204,36 @@ public final class IPCBus {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    static void onError(Method method, Object[] args, Throwable tr) {
+        try {
+            for (IPCTransactHandler ipcTransactHandler : ipcTransactHandlers) {
+                if (ipcTransactHandler != null)
+                    ipcTransactHandler.onError(method, args, tr);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static final class FakeCrashLibrary {
+        public static void log(int priority, String tag, String message) {
+            Log.println(priority, tag, message);
+        }
+
+        public static void logWarning(Throwable t) {
+            // TODO report non-fatal warning.
+        }
+
+        public static void logError(Throwable t) {
+            // TODO report non-fatal error.
+        }
+
+        private FakeCrashLibrary() {
+            throw new AssertionError("No instances.");
         }
     }
 

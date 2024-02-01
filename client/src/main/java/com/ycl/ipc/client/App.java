@@ -38,17 +38,17 @@ public class App extends Application {
 
 
         });
-//        IPCBus.addIPCTransactHandler(new IPCTransactHandler() {
-//            @Override
-//            public void onActionStart(Method method, Object[] args) {
-//                Log.i(TAG, "onActionStart() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "]");
-//            }
-//
-//            @Override
-//            public void onActionEnd(Method method, Object[] args, Object result) {
-//                Log.i(TAG, "onActionEnd() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "], result = [" + result + "]");
-//            }
-//        });
+        IPCBus.addIPCTransactHandler(new IPCTransactHandler() {
+            @Override
+            public void onActionStart(Method method, Object[] args) {
+                //Log.i(TAG, "onActionStart() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "]");
+            }
+
+            @Override
+            public void onActionEnd(Method method, Object[] args, Object result) {
+                Log.i(TAG, "onActionEnd() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "], result = [" + result + "]");
+            }
+        });
     }
 
     @Override

@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import timber.log.Timber;
+
 /**
  * IPC Proxy
  *
@@ -27,11 +29,9 @@ public final class IPCInvocationBridge implements InvocationHandler {
 
     @Override
     public Object invoke(Object o, Method method, Object[] args) throws Throwable {
+
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
-        }
-        if (binder == null || !binder.isBinderAlive()) {
-            binder = IPCBus.queryBinderProxy(serverInterface.getInterfaceClass(), serverInterface.getInterfaceName());
         }
 
         //兼容IInterface
@@ -39,11 +39,16 @@ public final class IPCInvocationBridge implements InvocationHandler {
             return binder;
         }
 
+        if (binder == null || !binder.isBinderAlive()) {
+            binder = IPCBus.queryBinderProxy(serverInterface.getInterfaceClass(), serverInterface.getInterfaceName());
+        }
+
         if (binder == null) {
-            throw new IllegalStateException("Can not found the binder : " + method.getDeclaringClass().getName() + "@" + method.getName());
+            throw new IllegalStateException("Can not found the binder : " + serverInterface.getInterfaceClass().getSimpleName() + "@" + method.getName());
         }
 
         IPCMethod ipcMethod = serverInterface.getIPCMethod(method);
+
         if (ipcMethod == null) {
             throw new IllegalStateException("Can not found the ipc method : " + method.getDeclaringClass().getName() + "@" + method.getName());
         }
@@ -54,9 +59,8 @@ public final class IPCInvocationBridge implements InvocationHandler {
         IBinder.DeathRecipient deathRecipient = new IBinder.DeathRecipient() {
             @Override
             public void binderDied() {
-                System.out.println("IPCBus binderDied >>>>>>>>>>> binder = " + binder);
+                Timber.i("binderDied binder = %s", binder);
                 if (binder != null) binder.unlinkToDeath(this, 0);
-                IPCInvocationBridge.this.binder = null;
             }
         };
         try {

@@ -3,6 +3,8 @@ package com.ycl.ipc.bus;
 import android.os.Binder;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +20,7 @@ public final class ServerInterface {
     private final SparseArray<IPCMethod> codeToInterfaceMethod;
     private final Map<Method, IPCMethod> methodToIPCMethodMap;
 
-    ServerInterface(Class<?> interfaceClass) {
+    ServerInterface(@NonNull Class<?> interfaceClass) {
         this.interfaceClass = interfaceClass;
         Method[] methods = interfaceClass.getMethods();
         codeToInterfaceMethod = new SparseArray<>(methods.length);

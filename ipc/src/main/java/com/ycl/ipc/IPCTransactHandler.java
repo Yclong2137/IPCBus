@@ -9,4 +9,9 @@ public interface IPCTransactHandler {
 
     void onActionEnd(Method method, Object[] args, Object result);
 
+
+    default void onError(Method method, Object[] args, Throwable tr) {
+
+    }
+
 }

@@ -8,8 +8,11 @@ import androidx.annotation.NonNull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import timber.log.Timber;
 
 /**
  * {@link RemoteCallbackList}
@@ -45,6 +48,7 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
         lock.lock();
         try {
             int count = super.beginBroadcast();
+            Timber.i("%s@%s() called with COUNT = %s, args= %s", method.getDeclaringClass().getSimpleName(), method.getName(), count, Arrays.toString(args));
             for (int index = 0; index < count; index++) {
                 IInterface item = super.getBroadcastItem(index);
                 if (item != null) {
@@ -63,6 +67,7 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
     }
 
     public final boolean register(@NonNull T callback) {
+        Timber.i("register() called with: callback = [" + callback + "]");
         if (callback instanceof IInterface) {
             return super.register((IInterface) callback);
         }
@@ -70,6 +75,7 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
     }
 
     public final boolean unregister(@NonNull T callback) {
+        Timber.i("unregister() called with: callback = [" + callback + "]");
         if (callback instanceof IInterface) {
             return super.unregister((IInterface) callback);
         }
