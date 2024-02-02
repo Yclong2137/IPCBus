@@ -55,6 +55,8 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
                     method.invoke(item, args);
                 }
             }
+        } catch (Exception e) {
+            Timber.e("%s@%s() called with args= %s occur error.", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(args));
         } finally {
             super.finishBroadcast();
             lock.unlock();
