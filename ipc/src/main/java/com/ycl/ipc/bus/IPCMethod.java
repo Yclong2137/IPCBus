@@ -5,9 +5,8 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
-
 import com.ycl.ipc.HiExecutor;
+import com.ycl.ipc.Util;
 import com.ycl.ipc.annotation.Oneway;
 import com.ycl.ipc.annotation.Unsubscribe;
 
@@ -131,7 +130,7 @@ public final class IPCMethod {
     public Object transact(IBinder server, Object[] args) {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
-        Object result = defaultValue(method.getReturnType());
+        Object result = Util.defaultValue(method.getReturnType());
         boolean status;
         try {
             Timber.i("[req] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args));
@@ -156,19 +155,6 @@ public final class IPCMethod {
         return result;
     }
 
-    private Object defaultValue(@NonNull Class<?> returnType) {
-        if (boolean.class == returnType || Boolean.class == returnType) {
-            return false;
-        }
-        if (void.class == returnType || Void.class == returnType) {
-            return null;
-        }
-        if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType)) {
-            // TODO: 2024/2/1 待商榷
-            return -0xff;
-        }
-        return null;
-    }
 
     private void handleStatus(boolean status) {
         if (!status) {
