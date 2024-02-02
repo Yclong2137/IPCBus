@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 public final class IPCSingleton<T> {
 
     private final Class<?> ipcClass;
+
     private T instance;
 
     public IPCSingleton(Class<?> ipcClass) {

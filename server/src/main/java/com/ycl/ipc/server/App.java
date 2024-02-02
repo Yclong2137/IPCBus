@@ -15,13 +15,12 @@ public class App extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        IPCBus.initialize(new IServerCache() {
+        IPCBus.initialize(new IServerCache.Cache(true) {
 
             @Override
-            public IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
+            public IBinder provideServiceFetcher() {
                 return null;
             }
-
         });
     }
 

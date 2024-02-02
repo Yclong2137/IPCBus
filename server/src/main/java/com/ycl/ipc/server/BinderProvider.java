@@ -5,45 +5,27 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 
 import androidx.core.app.BundleCompat;
 
-import com.ycl.ipc.IPCTransactHandler;
 import com.ycl.ipc.bus.IPCBus;
+import com.ycl.ipc.bus.IServerCache;
 import com.ycl.ipc.bus.RemoteCallbackListExt;
 import com.ycl.sdk_base.IActivityManager;
 import com.ycl.sdk_base.ICarListener;
-import com.ycl.sdk_base.IServiceFetcher;
 import com.ycl.sdk_base.bean.VideoViewAngleData;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
 
 
 public final class BinderProvider extends ContentProvider {
 
     private static final String TAG = "ws06_BinderProvider";
 
-    private final ServiceFetcher mServiceFetcher = new ServiceFetcher();
 
     private final RemoteCallbackListExt<ICarListener> callbackList = new RemoteCallbackListExt<>(ICarListener.class);
 
     @Override
     public boolean onCreate() {
-//        IPCBus.addIPCTransactHandler(new IPCTransactHandler() {
-//            @Override
-//            public void onActionStart(Method method, Object[] args) {
-//                Log.i(TAG, "onActionStart() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "]");
-//            }
-//
-//            @Override
-//            public void onActionEnd(Method method, Object[] args, Object result) {
-//                Log.i(TAG, "onActionEnd() called with: method = [" + method.getName() + "], args = [" + Arrays.toString(args) + "], result = [" + result + "]");
-//            }
-//        });
-        IPCBus.register(IServiceFetcher.class, mServiceFetcher);
         IPCBus.register(IActivityManager.class, new IActivityManager() {
             @Override
             public String getPackageName(int a, VideoViewAngleData data) {
@@ -83,11 +65,8 @@ public final class BinderProvider extends ContentProvider {
         Log.i(TAG, "call() called with: method = [" + method + "], arg = [" + arg + "], extras = [" + extras + "]");
         if ("@".equals(method)) {
             Bundle bundle = new Bundle();
-            BundleCompat.putBinder(bundle, "_VA_|_binder_", IPCBus.getBinder(IServiceFetcher.class));
+            BundleCompat.putBinder(bundle, "_VA_|_binder_", IPCBus.getBinder(IServerCache.IServiceFetcher.class));
             return bundle;
-        }
-        if ("register".equals(method)) {
-
         }
         return null;
     }
@@ -117,14 +96,4 @@ public final class BinderProvider extends ContentProvider {
         return 0;
     }
 
-    private static class ServiceFetcher implements IServiceFetcher {
-        @Override
-        public IBinder getService(String name) {
-            if (name != null) {
-                return IPCBus.getBinder(name);
-            }
-            return null;
-        }
-
-    }
 }

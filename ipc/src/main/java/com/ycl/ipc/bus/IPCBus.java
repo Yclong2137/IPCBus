@@ -27,8 +27,6 @@ public final class IPCBus {
 
     private static IServerCache sCache;
 
-    private static final Set<IPCTransactHandler> ipcTransactHandlers = new HashSet<>();
-
     /**
      * 初始化
      *
@@ -167,57 +165,6 @@ public final class IPCBus {
         checkInitialized();
         sCache.removeBinder(interfaceClass, server);
     }
-
-    /**
-     * 添加IPC处理器
-     *
-     * @param handler
-     */
-    public static void addIPCTransactHandler(@NonNull IPCTransactHandler handler) {
-        ipcTransactHandlers.add(handler);
-    }
-
-    /**
-     * 移除IPC处理器
-     *
-     * @param handler
-     */
-    public static void removeIPCTransactHandler(@NonNull IPCTransactHandler handler) {
-        ipcTransactHandlers.remove(handler);
-    }
-
-    static void onActionStart(Method method, Object[] args) {
-        try {
-            for (IPCTransactHandler ipcTransactHandler : ipcTransactHandlers) {
-                if (ipcTransactHandler != null) ipcTransactHandler.onActionStart(method, args);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    static void onActionEnd(Method method, Object[] args, Object result) {
-        try {
-            for (IPCTransactHandler ipcTransactHandler : ipcTransactHandlers) {
-                if (ipcTransactHandler != null)
-                    ipcTransactHandler.onActionEnd(method, args, result);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    static void onError(Method method, Object[] args, Throwable tr) {
-        try {
-            for (IPCTransactHandler ipcTransactHandler : ipcTransactHandlers) {
-                if (ipcTransactHandler != null)
-                    ipcTransactHandler.onError(method, args, tr);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 
     private static final class FakeCrashLibrary {
         public static void log(int priority, String tag, String message) {

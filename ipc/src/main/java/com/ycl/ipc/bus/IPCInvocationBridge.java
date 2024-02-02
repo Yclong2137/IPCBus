@@ -52,7 +52,7 @@ public final class IPCInvocationBridge implements InvocationHandler {
         if (ipcMethod == null) {
             throw new IllegalStateException("Can not found the ipc method : " + method.getDeclaringClass().getName() + "@" + method.getName());
         }
-        return ipcMethod.callRemote(binder, args);
+        return ipcMethod.transact(binder, args);
     }
 
     private void linkBinderDied(final IBinder binder) {

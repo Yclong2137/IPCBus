@@ -4,7 +4,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
 
@@ -102,61 +101,40 @@ public final class IPCMethod {
         return method;
     }
 
-    public void handleTransact(Object server, Parcel data, Parcel reply) {
+    public void onTransact(Object server, Parcel data, Parcel reply) {
         Object[] args = null;
         try {
             data.enforceInterface(interfaceName);
-            final Object[] parameters = applyParamConverter(data.readArray(getClass().getClassLoader()), Converter.FLAG_ON_TRANSACT);
-            args = parameters;
-            IPCBus.onActionStart(method, args);
+            args = applyParamConverter(data.readArray(getClass().getClassLoader()), Converter.FLAG_ON_TRANSACT);
             if (oneway) {
                 //解决防止Binder线程池过载，导致ipc无法正常通信
-                HiExecutor.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Timber.i("[rcv] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
-                            method.invoke(server, parameters);
-                        } catch (Exception e) {
-                            Timber.e(e, "[err] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
-                            IPCBus.onError(method, parameters, e);
-                        } finally {
-                            IPCBus.onActionEnd(method, parameters, null);
-                        }
-                    }
-                });
+                HiExecutor.getInstance().execute(new AsyncTask(method, server, args));
             } else {
-                Object res = null;
-                try {
-                    Timber.i("[rcv] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args));
-                    res = method.invoke(server, parameters);
-                    Timber.i("[rep] %s@%s(%s) called with oneway = %s, args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args), res);
-                    if (reply != null) {
-                        reply.writeNoException();
-                        reply.writeValue(res);
-                    }
-                } finally {
-                    IPCBus.onActionEnd(method, parameters, res);
+                Timber.i("[rcv] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args));
+                Object res = method.invoke(server, args);
+                Timber.i("[rep] %s@%s(%s) called with oneway = %s, args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args), res);
+                if (reply != null) {
+                    reply.writeNoException();
+                    reply.writeValue(res);
                 }
+
             }
         } catch (Exception e) {
             Timber.e(e, "[err] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(args));
             if (reply != null && !oneway) {
                 reply.writeException(new IllegalStateException(e));
             }
-            IPCBus.onError(method, args, e);
         }
     }
 
 
-    public Object callRemote(IBinder server, Object[] args) throws RemoteException {
+    public Object transact(IBinder server, Object[] args) {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         Object result = defaultValue(method.getReturnType());
         boolean status;
         try {
             Timber.i("[req] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args));
-            IPCBus.onActionStart(method, args);
             data.writeInterfaceToken(interfaceName);
             data.writeArray(args = applyParamConverter(args, Converter.FLAG_TRANSACT));
             if (oneway) {
@@ -171,11 +149,9 @@ public final class IPCMethod {
             }
         } catch (Exception e) {
             Timber.e(e, "[err] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args));
-            IPCBus.onError(method, args, e);
         } finally {
             data.recycle();
             reply.recycle();
-            IPCBus.onActionEnd(method, args, result);
         }
         return result;
     }
@@ -240,6 +216,29 @@ public final class IPCMethod {
         return Objects.equals(method, ipcMethod.method);
     }
 
+
+    private static class AsyncTask implements Runnable {
+
+        private final Method method;
+        private final Object server;
+        private final Object[] parameters;
+
+        public AsyncTask(Method method, Object server, Object[] parameters) {
+            this.method = method;
+            this.server = server;
+            this.parameters = parameters;
+        }
+
+        @Override
+        public void run() {
+            try {
+                Timber.i("[rcv] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
+                method.invoke(server, parameters);
+            } catch (Exception e) {
+                Timber.e(e, "[err] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
+            }
+        }
+    }
 
     public interface Converter {
 

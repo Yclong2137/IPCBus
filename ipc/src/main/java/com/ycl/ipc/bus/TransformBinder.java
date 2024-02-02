@@ -29,7 +29,7 @@ public final class TransformBinder extends Binder {
         }
         IPCMethod method = serverInterface.getIPCMethod(code);
         if (method != null) {
-            method.handleTransact(server, data, reply);
+            method.onTransact(server, data, reply);
             return true;
         }
         return super.onTransact(code, data, reply, flags);
