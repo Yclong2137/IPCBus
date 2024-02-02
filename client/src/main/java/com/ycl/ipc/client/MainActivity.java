@@ -25,7 +25,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-         iActivityManager = singleton.get();
+        iActivityManager = singleton.get();
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -43,12 +43,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn_register).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                iActivityManager.register(new ICarListener() {
-                    @Override
-                    public void test(int a) {
-
-                    }
-                });
+                iActivityManager.register(iCarListener);
                 //iActivityManager.register("iCarListener");
             }
         });
