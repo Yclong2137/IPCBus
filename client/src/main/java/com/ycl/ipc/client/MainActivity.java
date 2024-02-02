@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
 
                     }
                 });
-                iActivityManager.register("iCarListener");
+                //iActivityManager.register("iCarListener");
             }
         });
 
@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn_getACState).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //iActivityManager.getACState();
+                iActivityManager.getACState();
             }
         });
     }

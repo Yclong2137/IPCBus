@@ -6,6 +6,8 @@ import android.util.SparseArray;
 import androidx.annotation.NonNull;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +25,13 @@ public final class ServerInterface {
     ServerInterface(@NonNull Class<?> interfaceClass) {
         this.interfaceClass = interfaceClass;
         Method[] methods = interfaceClass.getMethods();
+        //防止顺序不一致导致code找不到正确的方法
+        Arrays.sort(methods, new Comparator<Method>() {
+            @Override
+            public int compare(Method o1, Method o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         codeToInterfaceMethod = new SparseArray<>(methods.length);
         methodToIPCMethodMap = new HashMap<>(methods.length);
         for (int i = 0; i < methods.length; i++) {

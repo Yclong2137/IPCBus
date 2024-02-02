@@ -115,9 +115,10 @@ public final class IPCMethod {
                     @Override
                     public void run() {
                         try {
+                            Timber.i("----->>>>>> %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
                             method.invoke(server, parameters);
                         } catch (Exception e) {
-                            Timber.e(e, "<<<<<<----- %s@%s(%s) called with code = %s occur error. ", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), code);
+                            Timber.e(e, "<<<----->>> %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
                             IPCBus.onError(method, parameters, e);
                         } finally {
                             IPCBus.onActionEnd(method, parameters, null);
@@ -127,7 +128,9 @@ public final class IPCMethod {
             } else {
                 Object res = null;
                 try {
+                    Timber.i("----->>>>>> %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args));
                     res = method.invoke(server, parameters);
+                    Timber.i("<<<<<<----- %s@%s(%s) called with oneway = %s, args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args), res);
                     if (reply != null) {
                         reply.writeNoException();
                         reply.writeValue(res);
@@ -137,7 +140,7 @@ public final class IPCMethod {
                 }
             }
         } catch (Exception e) {
-            Timber.e(e, "<<<<<<----- %s@%s(%s) called with code = %s occur error. ", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), code);
+            Timber.e(e, "<<<----->>> %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(args));
             if (reply != null && !oneway) {
                 reply.writeException(new IllegalStateException(e));
             }
@@ -152,6 +155,7 @@ public final class IPCMethod {
         Object result = defaultValue(method.getReturnType());
         boolean status;
         try {
+            Timber.i("----->>>>>> %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args));
             IPCBus.onActionStart(method, args);
             data.writeInterfaceToken(interfaceName);
             data.writeArray(args = applyParamConverter(args, Converter.FLAG_TRANSACT));
@@ -164,8 +168,9 @@ public final class IPCMethod {
                 reply.readException();
                 result = applyResultConverter(readValue(reply), Converter.FLAG_TRANSACT);
             }
+            Timber.i("<<<<<<----- %s@%s(%s) called with oneway = %s, args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args), result);
         } catch (Exception e) {
-            Timber.e(e, "----->>>>>> %s@%s(%s) called with code = %s occur error. ", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), code);
+            Timber.i("<<<----->>> %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args));
             IPCBus.onError(method, args, e);
         } finally {
             data.recycle();
@@ -178,6 +183,9 @@ public final class IPCMethod {
     private Object defaultValue(@NonNull Class<?> returnType) {
         if (boolean.class == returnType || Boolean.class == returnType) {
             return false;
+        }
+        if (void.class == returnType || Void.class == returnType) {
+            return null;
         }
         if (returnType.isPrimitive() || Number.class.isAssignableFrom(returnType)) {
             // TODO: 2024/2/1 待商榷
