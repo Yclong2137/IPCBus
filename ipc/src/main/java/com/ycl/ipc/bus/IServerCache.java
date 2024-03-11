@@ -58,9 +58,10 @@ public interface IServerCache {
 
         private final IPCSingleton<IServiceFetcher> serviceFetcher = new IPCSingleton<>(IServiceFetcher.class);
 
+        private final ServiceFetcher mServiceFetcher = new ServiceFetcher();
+
         private final List<TransformBinder> REGISTRY = new CopyOnWriteArrayList<>();
 
-        private final ServiceFetcher mServiceFetcher = new ServiceFetcher();
 
         /**
          * 构建服务缓存
@@ -87,7 +88,7 @@ public interface IServerCache {
 
         public final IBinder getBinder(String serverName) {
             for (TransformBinder binder : REGISTRY) {
-                if (serverName != null && serverName.equals(binder.getInterfaceName())) {
+                if (binder.equals(serverName)) {
                     return binder;
                 }
             }
@@ -96,7 +97,7 @@ public interface IServerCache {
 
         public final IBinder getBinder(Class<?> interfaceClass, Object server) {
             for (TransformBinder binder : REGISTRY) {
-                if (binder.getInterfaceClass() == interfaceClass && binder.getServer() == server) {
+                if (binder.equals(interfaceClass, server)) {
                     return binder;
                 }
             }
@@ -107,7 +108,7 @@ public interface IServerCache {
             for (int len = REGISTRY.size(), i = len - 1; i >= 0; i--) {
                 TransformBinder binder = REGISTRY.get(i);
                 if (binder == null) continue;
-                if (binder.getInterfaceClass() == interfaceClass && binder.getServer() == server) {
+                if (binder.equals(interfaceClass, server)) {
                     REGISTRY.remove(i);
                 }
             }

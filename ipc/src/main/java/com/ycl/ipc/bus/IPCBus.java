@@ -25,8 +25,6 @@ public final class IPCBus {
 
     private static volatile IServerCache sCache;
 
-    private static final Map<Class<?>, Object> PROXY_CACHE = new HashMap<>();
-
     /**
      * 初始化
      *
@@ -104,12 +102,7 @@ public final class IPCBus {
         if (binder == null) {
             binder = queryBinderProxy(interfaceClass, serverInterface.getInterfaceName());
         }
-        Object proxyInstance = PROXY_CACHE.get(interfaceClass);
-        if (proxyInstance == null) {
-            proxyInstance = Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
-            PROXY_CACHE.put(interfaceClass, proxyInstance);
-        }
-        return (T) proxyInstance;
+        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
     }
 
 

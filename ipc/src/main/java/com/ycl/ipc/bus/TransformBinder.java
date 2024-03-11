@@ -35,15 +35,12 @@ public final class TransformBinder extends Binder {
         return super.onTransact(code, data, reply, flags);
     }
 
-    Object getServer() {
-        return server;
+    final boolean equals(Class<?> interfaceClass, Object server) {
+        return interfaceClass == this.serverInterface.getInterfaceClass() && server == this.server;
     }
 
-    String getInterfaceName() {
-        return serverInterface.getInterfaceName();
+    final boolean equals(String serverName) {
+        return serverName != null && serverName.equals(serverInterface.getInterfaceName());
     }
 
-    Class<?> getInterfaceClass() {
-        return serverInterface.getInterfaceClass();
-    }
 }
