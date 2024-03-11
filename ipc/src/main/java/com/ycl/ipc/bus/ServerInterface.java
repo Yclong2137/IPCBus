@@ -18,11 +18,23 @@ import java.util.Map;
  */
 public final class ServerInterface {
 
+    private static final Map<Class<?>, ServerInterface> CACHE = new HashMap<>();
+
     private final Class<?> interfaceClass;
     private final SparseArray<IPCMethod> codeToInterfaceMethod;
     private final Map<Method, IPCMethod> methodToIPCMethodMap;
 
-    ServerInterface(@NonNull Class<?> interfaceClass) {
+
+    static ServerInterface get(@NonNull Class<?> interfaceClass) {
+        ServerInterface serverInterface = CACHE.get(interfaceClass);
+        if (serverInterface == null) {
+            serverInterface = new ServerInterface(interfaceClass);
+            CACHE.put(interfaceClass, serverInterface);
+        }
+        return serverInterface;
+    }
+
+    private ServerInterface(@NonNull Class<?> interfaceClass) {
         this.interfaceClass = interfaceClass;
         Method[] methods = interfaceClass.getMethods();
         //防止顺序不一致导致code找不到正确的方法

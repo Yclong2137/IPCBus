@@ -1,5 +1,6 @@
 package com.ycl.ipc.bus;
 
+import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteCallbackList;
 
@@ -68,6 +69,13 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
         return mCallback;
     }
 
+    /**
+     * register
+     *
+     * @param callback
+     * @return
+     * @see IPCBus#queryAndCreateBinderProxyInstance(Class, IBinder)
+     */
     public final boolean register(@NonNull T callback) {
         Timber.i("register() called with: callback = [" + callback + "]");
         if (callback instanceof IInterface) {
@@ -75,7 +83,13 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
         }
         return false;
     }
-
+    /**
+     * unregister
+     *
+     * @param callback
+     * @return
+     * @see IPCBus#queryAndCreateBinderProxyInstance(Class, IBinder)
+     */
     public final boolean unregister(@NonNull T callback) {
         Timber.i("unregister() called with: callback = [" + callback + "]");
         if (callback instanceof IInterface) {

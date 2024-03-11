@@ -1,8 +1,6 @@
 package com.ycl.ipc.bus;
 
-import android.os.Binder;
 import android.os.IBinder;
-import android.service.voice.VoiceInteractionSession;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,9 +49,6 @@ public final class IPCInvocationBridge implements InvocationHandler {
                     }
                 }
             }
-//            if (binder == null || !binder.isBinderAlive()) {
-//                binder = IPCBus.queryBinderProxy(serverInterface.getInterfaceClass(), serverInterface.getInterfaceName());
-//            }
 
             if (binder == null) {
                 throw new IllegalStateException("Can not found the binder : " + serverInterface.getInterfaceClass().getSimpleName() + "@" + method.getName());

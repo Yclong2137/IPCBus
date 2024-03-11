@@ -72,7 +72,7 @@ public interface IServerCache {
         }
 
         private void registerServiceFetcher() {
-            ServerInterface serverInterface = new ServerInterface(IServiceFetcher.class);
+            ServerInterface serverInterface = ServerInterface.get(IServiceFetcher.class);
             TransformBinder binder = new TransformBinder(serverInterface, mServiceFetcher);
             addBinder(binder);
         }

@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import com.ycl.ipc.BuildConfig;
 
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -21,7 +23,9 @@ import timber.log.Timber;
  */
 public final class IPCBus {
 
-    private static IServerCache sCache;
+    private static volatile IServerCache sCache;
+
+    private static final Map<Class<?>, Object> PROXY_CACHE = new HashMap<>();
 
     /**
      * 初始化
@@ -81,7 +85,7 @@ public final class IPCBus {
         if (sCache.isExist(interfaceClass, server)) {
             return;
         }
-        ServerInterface serverInterface = new ServerInterface(interfaceClass);
+        ServerInterface serverInterface = ServerInterface.get(interfaceClass);
         TransformBinder binder = new TransformBinder(serverInterface, server);
         sCache.addBinder(binder);
     }
@@ -95,14 +99,17 @@ public final class IPCBus {
      * @return BinderProxy实例
      */
     static <T> T queryAndCreateBinderProxyInstance(@NonNull Class<?> interfaceClass, @Nullable IBinder delegate) {
-        ServerInterface serverInterface = new ServerInterface(interfaceClass);
+        ServerInterface serverInterface = ServerInterface.get(interfaceClass);
         IBinder binder = delegate;
         if (binder == null) {
-            checkInitialized();
-            binder = sCache.queryBinderProxy(interfaceClass, serverInterface.getInterfaceName());
+            binder = queryBinderProxy(interfaceClass, serverInterface.getInterfaceName());
         }
-        //noinspection unchecked
-        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
+        Object proxyInstance = PROXY_CACHE.get(interfaceClass);
+        if (proxyInstance == null) {
+            proxyInstance = Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
+            PROXY_CACHE.put(interfaceClass, proxyInstance);
+        }
+        return (T) proxyInstance;
     }
 
 
