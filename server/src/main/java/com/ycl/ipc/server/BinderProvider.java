@@ -9,8 +9,8 @@ import android.util.Log;
 
 import androidx.core.app.BundleCompat;
 
+import com.ycl.ipc.IServiceFetcher;
 import com.ycl.ipc.bus.IPCBus;
-import com.ycl.ipc.bus.IServerCache;
 import com.ycl.ipc.bus.RemoteCallbackListExt;
 import com.ycl.sdk_base.IActivityManager;
 import com.ycl.sdk_base.ICarListener;
@@ -65,7 +65,7 @@ public final class BinderProvider extends ContentProvider {
         Log.i(TAG, "call() called with: method = [" + method + "], arg = [" + arg + "], extras = [" + extras + "]");
         if ("@".equals(method)) {
             Bundle bundle = new Bundle();
-            BundleCompat.putBinder(bundle, "_VA_|_binder_", IPCBus.getBinder(IServerCache.IServiceFetcher.class));
+            BundleCompat.putBinder(bundle, "_VA_|_binder_", IPCBus.getBinder(IServiceFetcher.class));
             return bundle;
         }
         return null;

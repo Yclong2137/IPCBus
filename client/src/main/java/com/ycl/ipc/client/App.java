@@ -21,7 +21,7 @@ public class App extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        IPCBus.initialize(new IServerCache.Cache(false) {
+        IPCBus.initialize(false, new IServerCache.Cache() {
 
             @Override
             public IBinder provideServiceFetcher() {

@@ -9,10 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ycl.ipc.BuildConfig;
+import com.ycl.ipc.IServiceFetcher;
 
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -23,6 +22,10 @@ import timber.log.Timber;
  */
 public final class IPCBus {
 
+
+    private static final IPCSingleton<IServiceFetcher> serviceFetcher = new IPCSingleton<>(IServiceFetcher.class);
+
+
     private static volatile IServerCache sCache;
 
     /**
@@ -30,10 +33,11 @@ public final class IPCBus {
      *
      * @param cache cache
      */
-    public static void initialize(@NonNull IServerCache cache) {
+    public static void initialize(boolean server, @NonNull IServerCache cache) {
         initTimber();
         Timber.i("initialize %s", cache);
         sCache = cache;
+        if (server) register(IServiceFetcher.class, new IServiceFetcher.ServiceFetcher());
     }
 
     private static void initTimber() {
@@ -160,6 +164,13 @@ public final class IPCBus {
     static void removeBinder(@NonNull Class<?> interfaceClass, @NonNull Object server) {
         checkInitialized();
         sCache.removeBinder(interfaceClass, server);
+    }
+
+    /**
+     * 服务拉取
+     */
+    static IServiceFetcher getServiceFetcher() {
+        return serviceFetcher.get();
     }
 
     private static final class FakeCrashLibrary {

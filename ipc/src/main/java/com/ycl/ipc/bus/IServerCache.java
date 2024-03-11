@@ -5,6 +5,8 @@ import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
 
+import com.ycl.ipc.IServiceFetcher;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -40,42 +42,17 @@ public interface IServerCache {
     IBinder provideServiceFetcher();
 
 
-    interface IServiceFetcher {
-        /**
-         * 获取对端服务
-         *
-         * @param name 服务名称
-         * @return 对端服务代理对象
-         */
-        IBinder getService(String name);
-    }
-
     /**
      * 服务缓存
      */
     abstract class Cache implements IServerCache {
 
-
-        private final IPCSingleton<IServiceFetcher> serviceFetcher = new IPCSingleton<>(IServiceFetcher.class);
-
-        private final ServiceFetcher mServiceFetcher = new ServiceFetcher();
-
         private final List<TransformBinder> REGISTRY = new CopyOnWriteArrayList<>();
-
 
         /**
          * 构建服务缓存
-         *
-         * @param server 服务端标识
-         */
-        public Cache(boolean server) {
-            if (server) registerServiceFetcher();
-        }
-
-        private void registerServiceFetcher() {
-            ServerInterface serverInterface = ServerInterface.get(IServiceFetcher.class);
-            TransformBinder binder = new TransformBinder(serverInterface, mServiceFetcher);
-            addBinder(binder);
+         **/
+        public Cache() {
         }
 
         public final void addBinder(@NonNull TransformBinder binder) {
@@ -121,7 +98,7 @@ public interface IServerCache {
                 linkBinderDied(binder);
                 return binder;
             } else {
-                return serviceFetcher.get().getService(serverName);
+                return IPCBus.getServiceFetcher().getService(serverName);
             }
         }
 
@@ -131,6 +108,7 @@ public interface IServerCache {
                 public void binderDied() {
                     Timber.i("binderDied binder = %s", binder);
                     REGISTRY.clear();//清除服务，防止内存泄露
+                    IServiceFetcher.ServiceFetcher.notifyServiceDisconnected();
                     binder.unlinkToDeath(this, 0);
                 }
             };
@@ -141,18 +119,6 @@ public interface IServerCache {
             }
         }
 
-
-        private class ServiceFetcher implements IServerCache.IServiceFetcher {
-
-            @Override
-            public IBinder getService(String name) {
-                if (name != null) {
-                    return getBinder(name);
-                }
-                return null;
-            }
-
-        }
 
     }
 
