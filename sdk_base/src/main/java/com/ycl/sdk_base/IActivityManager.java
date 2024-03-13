@@ -1,9 +1,11 @@
 package com.ycl.sdk_base;
 
+import com.ycl.ipc.annotation.IPCInterface;
 import com.ycl.ipc.annotation.Oneway;
 import com.ycl.ipc.annotation.Unsubscribe;
 import com.ycl.sdk_base.bean.VideoViewAngleData;
 
+@IPCInterface
 public interface IActivityManager {
 
     String getPackageName(int a, VideoViewAngleData data);

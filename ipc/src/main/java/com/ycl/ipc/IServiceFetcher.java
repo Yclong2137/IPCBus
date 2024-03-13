@@ -2,12 +2,14 @@ package com.ycl.ipc;
 
 import android.os.IBinder;
 
+import com.ycl.ipc.annotation.IPCInterface;
 import com.ycl.ipc.bus.IPCBus;
 import com.ycl.ipc.bus.RemoteCallbackListExt;
 
 /**
  * 服务拉取
  */
+@IPCInterface
 public interface IServiceFetcher {
 
     /**

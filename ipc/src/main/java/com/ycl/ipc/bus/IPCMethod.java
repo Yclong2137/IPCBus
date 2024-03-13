@@ -6,9 +6,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.ycl.ipc.HiExecutor;
-import com.ycl.ipc.Util;
 import com.ycl.ipc.annotation.Oneway;
 import com.ycl.ipc.annotation.Unsubscribe;
+import com.ycl.ipc.Util;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
