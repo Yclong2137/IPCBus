@@ -18,4 +18,14 @@ public final class Util {
         return null;
     }
 
+    /**
+     * 获取服务名称
+     *
+     * @param ipcClass
+     * @return
+     */
+    public static String getServerName(Class<?> ipcClass) {
+        return ipcClass.getSimpleName();
+    }
+
 }

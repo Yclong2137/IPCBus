@@ -32,6 +32,7 @@ public final class IPCInvocationBridge implements InvocationHandler {
 
     @Override
     public Object invoke(Object o, Method method, Object[] args) throws Throwable {
+        //unbox fail
         Object result = Util.defaultValue(method.getReturnType());
         try {
             if (method.getDeclaringClass() == Object.class) {
@@ -45,7 +46,7 @@ public final class IPCInvocationBridge implements InvocationHandler {
             if (!isBinderAlive(binder)) {
                 synchronized (serverInterface.getInterfaceClass()) {
                     if (!isBinderAlive(binder)) {
-                        binder = IPCBus.queryBinderProxy(serverInterface.getInterfaceClass(), serverInterface.getInterfaceName());
+                        binder = IPCBus.queryBinderProxy(Util.getServerName(serverInterface.getInterfaceClass()));
                     }
                 }
             }

@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -35,6 +36,8 @@ public class IPCProcessor extends AbstractProcessor {
 
     Logger logger;
 
+    Filer filer;
+
     private TypeMirror parcelableType;
     private TypeMirror serializableType;
 
@@ -45,6 +48,7 @@ public class IPCProcessor extends AbstractProcessor {
         elementUtils = processingEnv.getElementUtils();
         types = processingEnv.getTypeUtils();
         logger = new Logger(processingEnv.getMessager());
+        filer = processingEnv.getFiler();
         parcelableType = processingEnv.getElementUtils().getTypeElement(PARCELABLE).asType();
         serializableType = processingEnv.getElementUtils().getTypeElement(SERIALIZABLE).asType();
     }

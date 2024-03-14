@@ -6,6 +6,7 @@ import android.os.RemoteException;
 import androidx.annotation.NonNull;
 
 import com.ycl.ipc.IServiceFetcher;
+import com.ycl.ipc.Util;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -31,7 +32,7 @@ public interface IServerCache {
     void removeBinder(Class<?> interfaceClass, Object server);
 
 
-    IBinder queryBinderProxy(Class<?> interfaceClass, String serverName);
+    IBinder queryBinderProxy(String serverName);
 
 
     /**
@@ -55,14 +56,17 @@ public interface IServerCache {
         public Cache() {
         }
 
+        @Override
         public final void addBinder(@NonNull TransformBinder binder) {
             REGISTRY.add(binder);
         }
 
+        @Override
         public final boolean isExist(@NonNull Class<?> interfaceClass, @NonNull Object server) {
             return getBinder(interfaceClass, server) != null;
         }
 
+        @Override
         public final IBinder getBinder(String serverName) {
             for (TransformBinder binder : REGISTRY) {
                 if (binder.equals(serverName)) {
@@ -72,6 +76,7 @@ public interface IServerCache {
             return null;
         }
 
+        @Override
         public final IBinder getBinder(Class<?> interfaceClass, Object server) {
             for (TransformBinder binder : REGISTRY) {
                 if (binder.equals(interfaceClass, server)) {
@@ -81,6 +86,7 @@ public interface IServerCache {
             return null;
         }
 
+        @Override
         public final void removeBinder(Class<?> interfaceClass, Object server) {
             for (int len = REGISTRY.size(), i = len - 1; i >= 0; i--) {
                 TransformBinder binder = REGISTRY.get(i);
@@ -91,9 +97,9 @@ public interface IServerCache {
             }
         }
 
-
-        public final IBinder queryBinderProxy(Class<?> interfaceClass, String serverName) {
-            if (IServiceFetcher.class == interfaceClass) {
+        @Override
+        public final IBinder queryBinderProxy(String serverName) {
+            if (Util.getServerName(IServiceFetcher.class).equals(serverName)) {
                 IBinder binder = provideServiceFetcher();
                 linkBinderDied(binder);
                 return binder;

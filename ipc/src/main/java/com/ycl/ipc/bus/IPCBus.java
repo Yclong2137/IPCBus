@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.ycl.ipc.BuildConfig;
 import com.ycl.ipc.IServiceFetcher;
+import com.ycl.ipc.Util;
 
 import java.lang.reflect.Proxy;
 
@@ -93,33 +94,29 @@ public final class IPCBus {
     }
 
     /**
-     * 查询并创建BinderProxy实例
+     * 查询BinderProxy实例
      *
      * @param interfaceClass 服务接口
      * @param delegate       Binder委托
      * @param <T>
      * @return BinderProxy实例
      */
-    static <T> T queryAndCreateBinderProxyInstance(@NonNull Class<?> interfaceClass, @Nullable IBinder delegate) {
+    static <T> T getBinderProxyInstance(@NonNull Class<?> interfaceClass, @Nullable IBinder delegate) {
         ServerInterface serverInterface = ServerInterface.get(interfaceClass);
-        IBinder binder = delegate;
-        if (binder == null) {
-            binder = queryBinderProxy(interfaceClass, serverInterface.getInterfaceName());
-        }
-        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, binder));
+        // TODO: 2024/3/14 缓存处理
+        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass, IInterface.class}, new IPCInvocationBridge(serverInterface, delegate));
     }
 
 
     /**
      * 查询对端BinderProxy
      *
-     * @param interfaceClass 服务接口
-     * @param serverName     服务名称
+     * @param serverName 服务名称
      * @return BinderProxy
      */
-    static IBinder queryBinderProxy(@NonNull Class<?> interfaceClass, @NonNull String serverName) {
+    static IBinder queryBinderProxy(@NonNull String serverName) {
         checkInitialized();
-        return sCache.queryBinderProxy(interfaceClass, serverName);
+        return sCache.queryBinderProxy(serverName);
     }
 
     /**
@@ -129,7 +126,7 @@ public final class IPCBus {
      * @return Binder
      */
     public static IBinder getBinder(@NonNull Class<?> interfaceClass) {
-        return getBinder(interfaceClass.getName());
+        return getBinder(Util.getServerName(interfaceClass));
 
     }
 

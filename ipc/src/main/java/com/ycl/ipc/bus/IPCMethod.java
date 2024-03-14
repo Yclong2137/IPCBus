@@ -109,9 +109,9 @@ public final class IPCMethod {
                 //解决防止Binder线程池过载，导致ipc无法正常通信
                 HiExecutor.getInstance().execute(new AsyncTask(method, server, args));
             } else {
-                Timber.i("[rcv] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args));
+                Timber.i("[rcv] %s@%s called with args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(args));
                 Object res = method.invoke(server, args);
-                Timber.i("[rep] %s@%s(%s) called with oneway = %s, args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), false, Arrays.toString(args), res);
+                Timber.i("[rep] %s@%s called with args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(args), res);
                 if (reply != null) {
                     reply.writeNoException();
                     reply.writeValue(res);
@@ -119,7 +119,7 @@ public final class IPCMethod {
 
             }
         } catch (Exception e) {
-            Timber.e(e, "[err] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(args));
+            Timber.e(e, "[err] %s@%s called with args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(args));
             if (reply != null && !oneway) {
                 reply.writeException(new IllegalStateException(e));
             }
@@ -133,7 +133,7 @@ public final class IPCMethod {
         Object result = Util.defaultValue(method.getReturnType());
         boolean status;
         try {
-            Timber.i("[req] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args));
+            Timber.i("[req] %s@%s called with args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(args));
             data.writeInterfaceToken(interfaceName);
             data.writeArray(args = applyParamConverter(args, Converter.FLAG_TRANSACT));
             if (oneway) {
@@ -144,10 +144,10 @@ public final class IPCMethod {
                 handleStatus(status);
                 reply.readException();
                 result = applyResultConverter(readValue(reply), Converter.FLAG_TRANSACT);
-                Timber.i("[rep] %s@%s(%s) called with oneway = %s, args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args), result);
+                Timber.i("[rep] %s@%s called with args = %s, result = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(args), result);
             }
         } catch (Exception e) {
-            Timber.e(e, "[err] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), oneway, Arrays.toString(args));
+            Timber.e(e, "[err] %s@%s called with args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(args));
         } finally {
             data.recycle();
             reply.recycle();
@@ -218,10 +218,10 @@ public final class IPCMethod {
         @Override
         public void run() {
             try {
-                Timber.i("[rcv] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
+                Timber.i("[rcv] %s@%s(%s) called with args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), Arrays.toString(parameters));
                 method.invoke(server, parameters);
             } catch (Exception e) {
-                Timber.e(e, "[err] %s@%s(%s) called with oneway = %s, args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), true, Arrays.toString(parameters));
+                Timber.e(e, "[err] %s@%s(%s) called with args = %s", method.getDeclaringClass().getSimpleName(), method.getName(), Arrays.toString(method.getParameterTypes()), Arrays.toString(parameters));
             }
         }
     }
@@ -253,7 +253,7 @@ public final class IPCMethod {
             if (param != null) {
                 switch (flags) {
                     case Converter.FLAG_ON_TRANSACT:
-                        res = IPCBus.queryAndCreateBinderProxyInstance(type, (IBinder) param);
+                        res = IPCBus.getBinderProxyInstance(type, (IBinder) param);
                         break;
                     case Converter.FLAG_TRANSACT:
                         if (!unsubscribe) {

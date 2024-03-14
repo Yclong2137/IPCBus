@@ -6,6 +6,8 @@ import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
 
+import com.ycl.ipc.Util;
+
 /**
  * Binder Stub
  *
@@ -40,7 +42,7 @@ public final class TransformBinder extends Binder {
     }
 
     final boolean equals(String serverName) {
-        return serverName != null && serverName.equals(serverInterface.getInterfaceName());
+        return serverName != null && serverName.equals(Util.getServerName(serverInterface.getInterfaceClass()));
     }
 
 }

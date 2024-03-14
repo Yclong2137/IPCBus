@@ -2,7 +2,7 @@ package com.ycl.ipc.bus;
 
 import android.os.IBinder;
 
-import androidx.annotation.Nullable;
+import com.ycl.ipc.Util;
 
 /**
  * IPCSingleton
@@ -20,20 +20,16 @@ public final class IPCSingleton<T> {
         this.ipcClass = ipcClass;
     }
 
-    public T get(@Nullable IBinder delegate) {
+    public T get() {
         if (instance == null) {
             synchronized (this) {
                 if (instance == null) {
-                    instance = IPCBus.queryAndCreateBinderProxyInstance(ipcClass, delegate);
+                    IBinder binder = IPCBus.queryBinderProxy(Util.getServerName(ipcClass));
+                    instance = IPCBus.getBinderProxyInstance(ipcClass, binder);
                 }
             }
         }
         return instance;
-    }
-
-
-    public T get() {
-        return get(null);
     }
 
 }
