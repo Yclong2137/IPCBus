@@ -74,7 +74,7 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
      *
      * @param callback
      * @return
-     * @see IPCBus#queryAndCreateBinderProxyInstance(Class, IBinder)
+     * @see IPCBus#getBinderProxyInstance(Class, IBinder)
      */
     public final boolean register(@NonNull T callback) {
         Timber.i("register() called with: callback = [" + callback + "]");
@@ -88,7 +88,7 @@ public class RemoteCallbackListExt<T> extends RemoteCallbackList<IInterface> {
      *
      * @param callback
      * @return
-     * @see IPCBus#queryAndCreateBinderProxyInstance(Class, IBinder)
+     * @see IPCBus#getBinderProxyInstance(Class, IBinder)
      */
     public final boolean unregister(@NonNull T callback) {
         Timber.i("unregister() called with: callback = [" + callback + "]");
