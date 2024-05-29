@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
+import com.ycl.sdk_base.HiLog;
+
 public class ContentProviderCompat {
     public static Bundle call(Context context, Uri uri, String method, String arg, Bundle extras) {
         ContentProviderClient client = crazyAcquireContentProvider(context, uri);

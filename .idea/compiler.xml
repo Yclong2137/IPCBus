@@ -21,8 +21,10 @@
     </annotationProcessing>
     <bytecodeTargetLevel target="1.7">
       <module name="IPCBus.client" target="1.8" />
+      <module name="IPCBus.file-manager" target="1.8" />
       <module name="IPCBus.ipc" target="1.8" />
       <module name="IPCBus.ipc-compiler" target="1.8" />
+      <module name="IPCBus.mvp" target="1.8" />
       <module name="IPCBus.sdk_base" target="1.8" />
       <module name="IPCBus.server" target="1.8" />
     </bytecodeTargetLevel>

@@ -89,3 +89,6 @@ afterEvaluate {
         }
     }
 }
+repositories {
+    mavenCentral()
+}
