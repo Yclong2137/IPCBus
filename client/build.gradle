@@ -41,8 +41,6 @@ dependencies {
     implementation project(":sdk_base")
     annotationProcessor project(":ipc-compiler")
     implementation project(":mvp")
-    implementation project(":file-manager")
-    //annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
 }
 repositories {

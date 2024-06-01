@@ -1,23 +1,17 @@
 package com.ycl.ipc.client;
 
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.ycl.file_manager.FileListActivity;
 import com.ycl.ipc.bus.IPCSingleton;
 import com.ycl.sdk_base.HiLog;
 import com.ycl.sdk_base.IActivityManager;
 import com.ycl.sdk_base.ICarListener;
 import com.ycl.sdk_base.bean.VideoViewAngleData;
-
-import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements UsbContract.View {
 
@@ -48,13 +42,6 @@ public class MainActivity extends AppCompatActivity implements UsbContract.View 
 //        startService(new Intent(this, MyService.class));
 //        iActivityManager = singleton.get();
 //        new UsbPresenter(this);
-        findViewById(R.id.btn_file_manager).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, FileListActivity.class);
-                MainActivity.this.startActivity(intent);
-            }
-        });
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
