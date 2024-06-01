@@ -3,16 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="12dp">
 
 
-    <ImageView
-        android:id="@+id/iv_file"
-        android:layout_gravity="center"
+    <FrameLayout
         android:layout_width="80dp"
         android:layout_height="80dp"
-        tools:src="@mipmap/ic_launcher" />
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/iv_file"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            tools:src="@mipmap/ic_launcher" />
+
+        <CheckBox
+            android:id="@+id/cb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="8dp" />
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/tv_file_name"
@@ -23,5 +36,15 @@
         android:gravity="center"
         android:singleLine="true"
         tools:text="文件名" />
+
+    <TextView
+        android:id="@+id/tv_file_last_modified"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:singleLine="true"
+        tools:text="最后修改时间" />
 
 </LinearLayout>

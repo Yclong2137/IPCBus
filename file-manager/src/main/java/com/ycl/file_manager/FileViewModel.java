@@ -10,11 +10,11 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.ycl.file_manager.business.tree.FileSystemNode;
 import com.ycl.file_manager.business.creator.NodeCreator;
 import com.ycl.file_manager.business.filter.INodeFilter;
 import com.ycl.file_manager.business.store.FileNodeStore;
 import com.ycl.file_manager.business.store.IFileNodeStore;
+import com.ycl.file_manager.business.tree.FileSystemNode;
 
 import java.util.concurrent.Executors;
 
@@ -37,7 +37,33 @@ public class FileViewModel extends AndroidViewModel {
         Log.d(TAG, "FileViewModel() called with: application = [" + application + "]");
         rootPath = Environment.getExternalStorageDirectory().getPath();
         Log.d(TAG, "FileViewModel() called with: rootPath = [" + rootPath + "]");
+        mFileNodeStore.setOnScanStateListener(new IFileNodeStore.OnScanStateListener() {
 
+            @Override
+            public void onScanStart() {
+                Log.d(TAG, "onScanStart() called");
+            }
+
+            @Override
+            public void onScanSuccess(FileSystemNode root) {
+                Log.d(TAG, "onScanSuccess() called with: root = [" + root + "]");
+            }
+
+            @Override
+            public void onScanFailure(int code, String msg) {
+                Log.d(TAG, "onScanFailure() called with: code = [" + code + "], msg = [" + msg + "]");
+            }
+
+            @Override
+            public void onScanProgressChanged(FileSystemNode node, int progress) {
+                Log.d(TAG, "onScanProgressChanged() called with: node = [" + node + "], progress = [" + progress + "]");
+            }
+
+            @Override
+            public void onFinished() {
+                Log.d(TAG, "onFinished() called");
+            }
+        });
     }
 
     /**

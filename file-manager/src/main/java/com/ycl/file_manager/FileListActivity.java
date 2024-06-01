@@ -1,9 +1,12 @@
 package com.ycl.file_manager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,12 +19,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.ycl.file_manager.business.tree.DirectoryNode;
-import com.ycl.file_manager.business.tree.FileSystemNode;
 import com.ycl.file_manager.business.filter.INodeFilter;
 import com.ycl.file_manager.business.filter.NodeFilter;
 import com.ycl.file_manager.business.sort.ISortStrategy;
 import com.ycl.file_manager.business.sort.SortStrategy;
+import com.ycl.file_manager.business.tree.DirectoryNode;
+import com.ycl.file_manager.business.tree.FileSystemNode;
 
 import java.util.Arrays;
 
@@ -39,7 +42,7 @@ public class FileListActivity extends AppCompatActivity {
      */
     private final ISortStrategy mSortStrategy = SortStrategy.NONE;
 
-    private final INodeFilter mNodeFilter = NodeFilter.VIDEO;
+    private final INodeFilter mNodeFilter = NodeFilter.NONE;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -47,6 +50,7 @@ public class FileListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_list);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,6 +67,33 @@ public class FileListActivity extends AppCompatActivity {
         mFileViewModel = new ViewModelProvider(this, new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(FileViewModel.class);
         initView();
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_files, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.id_menu_delete:
+                Toast.makeText(this, "删除", Toast.LENGTH_SHORT).show();
+                if (mFileListAdapter != null) mFileListAdapter.applyDelOp(mNodeFilter);
+                break;
+            case R.id.id_menu_edit:
+                Toast.makeText(this, "编辑", Toast.LENGTH_SHORT).show();
+                if (mFileListAdapter != null) mFileListAdapter.applyEditModeOp();
+                break;
+            case R.id.id_menu_rename:
+                Toast.makeText(this, "重命名", Toast.LENGTH_SHORT).show();
+                //if (mFileListAdapter != null) mFileListAdapter.applyRenameOp();
+
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

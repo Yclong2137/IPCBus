@@ -14,23 +14,16 @@ import java.io.File;
  **/
 public abstract class FileSystemNode implements FileNodeAction {
 
-    public static final Factory DEFAULT = new Factory() {
-
-        @Override
-        public FileSystemNode create(File file, @NonNull IFileNodeCreator fileNodeCreator) {
-            return fileNodeCreator.create(file);
-        }
-
-    };
-
     /**
      * 文件路径
      */
     protected String path;
+
     /**
      * 父节点
      */
     protected FileSystemNode parent;
+
 
     public FileSystemNode(String path) {
         this.path = path;
@@ -80,6 +73,7 @@ public abstract class FileSystemNode implements FileNodeAction {
     protected final void setLastModified(long time) {
         File file = new File(path);
         if (file.setLastModified(time)) {
+            //同步修改上级目录的改动时间
             if (parent != null) {
                 parent.setLastModified(time);
             }
@@ -94,7 +88,9 @@ public abstract class FileSystemNode implements FileNodeAction {
         return file.lastModified();
     }
 
-
+    /**
+     * 父目录
+     */
     public FileSystemNode getParent() {
         return parent;
     }
@@ -116,7 +112,7 @@ public abstract class FileSystemNode implements FileNodeAction {
     }
 
     private boolean isSpace(String path) {
-        return path != null && !path.isEmpty();
+        return path == null || path.isEmpty();
     }
 
     /**
@@ -126,6 +122,15 @@ public abstract class FileSystemNode implements FileNodeAction {
 
         public abstract FileSystemNode create(File file, @NonNull IFileNodeCreator fileNodeCreator);
     }
+
+    public static final Factory FACTORY = new Factory() {
+
+        @Override
+        public FileSystemNode create(File file, @NonNull IFileNodeCreator fileNodeCreator) {
+            return fileNodeCreator.create(file);
+        }
+
+    };
 
 
 }

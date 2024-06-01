@@ -9,6 +9,7 @@ import com.ycl.file_manager.business.sort.SortStrategy;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -21,6 +22,9 @@ import java.util.List;
  **/
 public class DirectoryNode extends FileSystemNode {
 
+    /**
+     * 子节点集
+     */
     private final List<FileSystemNode> subNodes = new ArrayList<>();
 
     public DirectoryNode(String path) {
@@ -71,6 +75,20 @@ public class DirectoryNode extends FileSystemNode {
     public boolean rename(String name) {
         // TODO: 2024/5/29 重命名
         //1.重命名（没有后缀）
+        File oldFile = new File(path);
+        File newFile = new File(oldFile.getParent() + File.separator + name);
+        if (oldFile.renameTo(newFile)) {
+            //同步子路径
+            for (FileSystemNode subNode : subNodes) {
+                if (subNode instanceof DirectoryNode) {
+                    rename(subNode.getFileName());
+                } else {
+
+                }
+            }
+            //同步时间
+            setLastModified(System.currentTimeMillis());
+        }
         //2.更改时间
         return false;
     }
@@ -78,8 +96,14 @@ public class DirectoryNode extends FileSystemNode {
     @Override
     public boolean delete() {
         //删除文件
-        deleteFile(this);
-        return false;
+        deleteFile(this, NodeFilter.NONE);
+        return true;
+    }
+
+    public boolean delete(INodeFilter filter) {
+        //删除文件
+        deleteFile(this, filter);
+        return true;
     }
 
     @Override
@@ -91,9 +115,10 @@ public class DirectoryNode extends FileSystemNode {
     /**
      * 删除文件
      *
-     * @param root
+     * @param root 节点
      */
-    private void deleteFile(FileSystemNode root) {
+    private void deleteFile(FileSystemNode root, INodeFilter filter) {
+
         if (root instanceof FileNode) {
             //删除文件节点
             root.delete();
@@ -101,22 +126,21 @@ public class DirectoryNode extends FileSystemNode {
         }
         if (root instanceof DirectoryNode) {
             //删除子节点文件
-            for (FileSystemNode node : ((DirectoryNode) root).subNodes) {
-                deleteFile(node);
+            for (FileSystemNode node : ((DirectoryNode) root).getSubNodes(filter)) {
+                deleteFile(node, filter);
             }
             // TODO: 2024/5/30 删除文件夹节点(需确认文件夹中是否有其他类型的文件)
-            File file = new File(root.getPath());
-            File[] files;
-            //文件夹存在且文件夹中没有任何文件才能删除
-            if (file.exists() && file.isDirectory() && (files = file.listFiles()) != null && files.length == 0) {
-                file.deleteOnExit();
-            }
+//            File file = new File(root.getPath());
+//            File[] files;
+//            //文件夹存在且文件夹中没有任何文件才能删除
+//            if (file.exists() && file.isDirectory() && (files = file.listFiles()) != null && files.length == 0) {
+//                file.deleteOnExit();
+//            }
             //移除本节点
-            if (parent != null) {
-                if (parent instanceof DirectoryNode) {
-                    ((DirectoryNode) parent).removeSubNode(this);
-                }
+            if (parent instanceof DirectoryNode) {
+                ((DirectoryNode) parent).removeSubNode(this);
             }
+
         }
 
     }
@@ -181,15 +205,25 @@ public class DirectoryNode extends FileSystemNode {
      * @param filter   过滤器
      */
     public final List<FileSystemNode> getSubNodes(@NonNull ISortStrategy strategy, @NonNull INodeFilter filter) {
-        return strategy.getSortNodes(wrapFilter(subNodes, filter));
+        return strategy.getSortNodes(applyFilter(subNodes, filter));
     }
 
-    private List<FileSystemNode> wrapFilter(List<FileSystemNode> nodes, @NonNull INodeFilter filter) {
-        if (nodes == null || nodes.isEmpty() || NodeFilter.NONE == filter) {
-            return nodes;
+    /**
+     * 应用过滤器
+     *
+     * @param nodes  原始节点集
+     * @param filter 过滤器
+     * @return 新节点集
+     */
+    private List<FileSystemNode> applyFilter(List<FileSystemNode> nodes, @NonNull INodeFilter filter) {
+
+        if (nodes == null) {
+            return Collections.emptyList();
+        }
+        if (NodeFilter.NONE == filter) {
+            return new ArrayList<>(nodes);
         }
         List<FileSystemNode> list = new ArrayList<>();
-
         for (FileSystemNode node : nodes) {
             if (filter.doFilter(node)) {
                 list.add(node);

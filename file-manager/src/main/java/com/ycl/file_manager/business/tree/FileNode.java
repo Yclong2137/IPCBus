@@ -56,11 +56,8 @@ public class FileNode extends FileSystemNode {
         File newFile = new File(oldFile.getParent() + File.separator + newName);
         boolean b = oldFile.renameTo(newFile);
         if (b) {
-            if (parent != null) {
-                //更新最后修改时间
-                parent.setLastModified(System.currentTimeMillis());
-            }
             this.path = newFile.getPath();
+            setLastModified(System.currentTimeMillis());
         }
         return b;
     }
@@ -72,14 +69,18 @@ public class FileNode extends FileSystemNode {
         if (!file.exists()) {
             return false;
         }
-        boolean b = file.delete();
-        if (b) {
-            //更新时间
-            if (parent != null) {
-                parent.setLastModified(System.currentTimeMillis());
-            }
+        // TODO: 2024/6/1 暂时不移除文件
+//        boolean b = file.delete();
+//        if (b) {
+//            //更新时间
+//            if (parent != null) {
+//                parent.setLastModified(System.currentTimeMillis());
+//            }
+//        }
+        if (parent instanceof DirectoryNode) {
+            ((DirectoryNode) parent).removeSubNode(this);
         }
-        return b;
+        return true;
     }
 
     @Override
