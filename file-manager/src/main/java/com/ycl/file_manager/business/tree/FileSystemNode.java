@@ -68,14 +68,15 @@ public abstract class FileSystemNode implements FileNodeAction {
     /**
      * 设置修改时间
      *
-     * @param time 时间戳
+     * @param time     时间戳
+     * @param onlySelf true 只更新自己 false 更新父节点和自己
      */
-    protected final void setLastModified(long time) {
+    protected final void setLastModified(long time, boolean onlySelf) {
         File file = new File(path);
-        if (file.setLastModified(time)) {
+        if (file.setLastModified(time) && !onlySelf) {
             //同步修改上级目录的改动时间
             if (parent != null) {
-                parent.setLastModified(time);
+                parent.setLastModified(time, false);
             }
         }
     }

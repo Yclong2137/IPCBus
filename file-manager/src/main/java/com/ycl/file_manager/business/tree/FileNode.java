@@ -57,7 +57,7 @@ public class FileNode extends FileSystemNode {
         boolean b = oldFile.renameTo(newFile);
         if (b) {
             this.path = newFile.getPath();
-            setLastModified(System.currentTimeMillis());
+            setLastModified(System.currentTimeMillis(), false);
         }
         return b;
     }
