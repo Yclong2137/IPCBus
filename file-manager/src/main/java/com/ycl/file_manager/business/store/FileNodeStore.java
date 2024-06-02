@@ -2,6 +2,7 @@ package com.ycl.file_manager.business.store;
 
 import androidx.annotation.NonNull;
 
+import com.ycl.file_manager.business.ErrorCodes;
 import com.ycl.file_manager.business.creator.IFileNodeCreator;
 import com.ycl.file_manager.business.filter.INodeFilter;
 import com.ycl.file_manager.business.tree.DirectoryNode;
@@ -37,7 +38,7 @@ public class FileNodeStore implements IFileNodeStore {
             File dirFile = new File(rootPath);
             if (!dirFile.exists()) {
                 if (mOnScanStateListener != null) {
-                    mOnScanStateListener.onScanFailure(-1, "文件不存在");
+                    mOnScanStateListener.onScanFailure(ErrorCodes.FILE_NO_FOUND, "文件不存在");
                 }
                 return null;
             }
@@ -51,7 +52,7 @@ public class FileNodeStore implements IFileNodeStore {
         } catch (Exception e) {
             e.printStackTrace();
             if (mOnScanStateListener != null) {
-                mOnScanStateListener.onScanFailure(-1, "扫描失败");
+                mOnScanStateListener.onScanFailure(ErrorCodes.SCAN_ERROR, "扫描失败");
             }
         } finally {
             if (mOnScanStateListener != null) {
