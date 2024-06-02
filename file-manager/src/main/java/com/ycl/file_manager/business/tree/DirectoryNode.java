@@ -77,18 +77,11 @@ public class DirectoryNode extends FileSystemNode {
         File oldFile = new File(path);
         File newFile = new File(oldFile.getParent() + File.separator + name);
         if (oldFile.renameTo(newFile)) {
-            //同步子路径
-//            for (FileSystemNode subNode : subNodes) {
-//                if (subNode instanceof DirectoryNode) {
-//                    rename(subNode.getFileName());
-//                } else {
-//
-//                }
-//            }
-//            //同步时间
-//            setLastModified(System.currentTimeMillis());
+            // TODO: 2024/6/2 同步修改全部子路径
+            for (FileSystemNode subNode : subNodes) {
+
+            }
         }
-        //2.更改时间
         return false;
     }
 
