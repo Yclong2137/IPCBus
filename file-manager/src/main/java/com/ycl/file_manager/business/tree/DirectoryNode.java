@@ -65,7 +65,6 @@ public class DirectoryNode extends FileSystemNode {
     public String getFileName() {
         File file = new File(path);
         if (file.exists()) {
-            // TODO: 2024/5/30 对文件后缀进行处理
             return file.getName();
         }
         return null;
@@ -79,15 +78,15 @@ public class DirectoryNode extends FileSystemNode {
         File newFile = new File(oldFile.getParent() + File.separator + name);
         if (oldFile.renameTo(newFile)) {
             //同步子路径
-            for (FileSystemNode subNode : subNodes) {
-                if (subNode instanceof DirectoryNode) {
-                    rename(subNode.getFileName());
-                } else {
-
-                }
-            }
-            //同步时间
-            setLastModified(System.currentTimeMillis());
+//            for (FileSystemNode subNode : subNodes) {
+//                if (subNode instanceof DirectoryNode) {
+//                    rename(subNode.getFileName());
+//                } else {
+//
+//                }
+//            }
+//            //同步时间
+//            setLastModified(System.currentTimeMillis());
         }
         //2.更改时间
         return false;
@@ -213,7 +212,7 @@ public class DirectoryNode extends FileSystemNode {
      *
      * @param nodes  原始节点集
      * @param filter 过滤器
-     * @return 新节点集
+     * @return 新节点集快照
      */
     private List<FileSystemNode> applyFilter(List<FileSystemNode> nodes, @NonNull INodeFilter filter) {
 
