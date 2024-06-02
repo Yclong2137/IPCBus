@@ -2,6 +2,8 @@ package com.ycl.file_manager.business.sort;
 
 import com.ycl.file_manager.business.tree.FileSystemNode;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -19,7 +21,12 @@ public class SizeSortStrategy implements ISortStrategy {
 
     @Override
     public List<FileSystemNode> getSortNodes(List<FileSystemNode> nodes) {
-        // TODO: 2024/5/31 待实现
+        Collections.sort(nodes, new Comparator<FileSystemNode>() {
+            @Override
+            public int compare(FileSystemNode o1, FileSystemNode o2) {
+                return (int) (o1.sizeOfFiles() - o2.sizeOfFiles());
+            }
+        });
         return nodes;
     }
 }
