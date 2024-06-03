@@ -32,8 +32,6 @@ public class FileViewModel extends AndroidViewModel {
 
     private final IFileNodeStore mFileNodeStore = new FileNodeStore();
 
-    private final MutableLiveData<Boolean> editModeLivedata = new MutableLiveData<>();
-
     public FileViewModel(@NonNull Application application) {
         super(application);
         Log.d(TAG, "FileViewModel() called with: application = [" + application + "]");
@@ -68,14 +66,6 @@ public class FileViewModel extends AndroidViewModel {
         });
     }
 
-    /**
-     * 编辑模式
-     *
-     * @param editMode
-     */
-    public void applyEditMode(boolean editMode) {
-        editModeLivedata.setValue(editMode);
-    }
 
     /**
      * 加载文件节点
@@ -92,9 +82,6 @@ public class FileViewModel extends AndroidViewModel {
         });
     }
 
-    public LiveData<Boolean> getEditModeLivedata() {
-        return editModeLivedata;
-    }
 
     public LiveData<FileSystemNode> getObservableRootNode() {
         return mObservableRootNode;

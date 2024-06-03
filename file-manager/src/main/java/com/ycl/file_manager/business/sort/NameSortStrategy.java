@@ -25,7 +25,7 @@ public class NameSortStrategy implements ISortStrategy {
         Collections.sort(nodes, new Comparator<FileSystemNode>() {
             @Override
             public int compare(FileSystemNode o1, FileSystemNode o2) {
-                // TODO: 2024/6/3 文件夹排在前面
+                //文件夹排在前面
                 if (o1 instanceof DirectoryNode && !(o2 instanceof DirectoryNode)) {
                     return -1;
                 }

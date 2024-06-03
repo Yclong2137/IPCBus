@@ -46,6 +46,7 @@ public class FileNodeStore implements IFileNodeStore {
             FileSystemNode root = FileSystemNode.FACTORY.create(dirFile, nodeCreator);
             //扫描文件
             node = scanFile(root, nodeCreator, nodeFilter);
+
             if (mOnScanStateListener != null) {
                 mOnScanStateListener.onScanSuccess(node);
             }
@@ -103,7 +104,7 @@ public class FileNodeStore implements IFileNodeStore {
                 child = scanFile(node, nodeCreator, nodeFilter);
             } else {
                 //处理文件
-                if (nodeFilter.doFilter(node)) {
+                if (node != null && nodeFilter.doFilter(node)) {
                     child = node;
                     if (mOnScanStateListener != null) {
                         mOnScanStateListener.onScanProgressChanged(node, mScanNum.incrementAndGet());

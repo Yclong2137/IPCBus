@@ -42,6 +42,7 @@ public final class DefaultFileNodeCreator implements IFileNodeCreator {
             return new DirectoryNode(file.getPath());
         }
         String fileName = file.getName().toLowerCase();
+
         if (PICTURE_PATTERN.matcher(fileName).matches()) {
             return new PictureFileNode(file.getPath());
         }

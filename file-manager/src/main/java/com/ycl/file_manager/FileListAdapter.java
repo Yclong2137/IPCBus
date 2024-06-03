@@ -1,6 +1,7 @@
 package com.ycl.file_manager;
 
 import android.content.Context;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,9 +28,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Random;
 
 public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter.VH> {
+
+    private static final String TAG = "FileListAdapter";
+
+    private static final Object PAYLOAD_RENAME = new Object();
+    private static final Object PAYLOAD_CHOICE = new Object();
 
     private final Context mContext;
 
@@ -51,7 +55,7 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
      */
     public void applyEditModeOp(boolean editMode) {
         this.editMode = editMode;
-        notifyItemRangeChanged(0, getCurrentList().size());
+        notifyItemRangeChanged(0, getCurrentList().size(), PAYLOAD_CHOICE);
     }
 
     /**
@@ -64,17 +68,24 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
     /**
      * 重命名
      *
-     * @param node     点中节点
+     * @param position 选中索引
      * @param name     新名称
      * @param strategy 排序策略
      */
-    public void applyRenameOp(FileSystemNode node, String name, ISortStrategy strategy) {
+    public void applyRenameOp(int position, String name, ISortStrategy strategy) {
+        FileSystemNode node = getItem(position);
         if (node.rename(name)) {
             FileSystemNode parent;
             if ((parent = node.getParent()) != null && parent instanceof DirectoryNode) {
                 //重命名后需要重新排序
-                this.submitList(((DirectoryNode) parent).getSubNodes(strategy));
+                this.submitList(((DirectoryNode) parent).getSubNodes(strategy), new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyItemRangeChanged(0, getCurrentList().size(), PAYLOAD_RENAME);
+                    }
+                });
             }
+
         }
 
     }
@@ -83,30 +94,32 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
      * 删除
      */
     public void applyDelOp(INodeFilter filter) {
-        List<FileSystemNode> snapshot = getSnapshot();
-        List<FileSystemNode> selectedNodes = getSelectedNodes();
-        for (FileSystemNode node : selectedNodes) {
+        List<FileSystemNode> snapshotList = getSnapshotList();
+        int[] posArray = getSelectedPosArray();
+        for (int index = 0; index < posArray.length; index++) {
+            int position = posArray[posArray.length - index - 1];
+            FileSystemNode node = snapshotList.get(position);
             if (node instanceof DirectoryNode) {
                 ((DirectoryNode) node).delete(filter);
             } else {
                 node.delete();
             }
+            snapshotList.remove(position);
         }
-        snapshot.removeAll(selectedNodes);
+        //提交数据
+        this.submitList(snapshotList);
 
-        this.submitList(snapshot);
     }
 
     /**
-     * 选中的文件节点
+     * 获取选中的位置
      */
-    public List<FileSystemNode> getSelectedNodes() {
-
-        List<FileSystemNode> nodes = new ArrayList<>();
+    public int[] getSelectedPosArray() {
+        int[] array = new int[itemSelectedArray.size()];
         for (int i = 0; i < itemSelectedArray.size(); i++) {
-            nodes.add(getCurrentList().get(itemSelectedArray.keyAt(i)));
+            array[i] = itemSelectedArray.keyAt(i);
         }
-        return nodes;
+        return array;
     }
 
     /**
@@ -119,13 +132,13 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
     /**
      * 快照
      */
-    private List<FileSystemNode> getSnapshot() {
+    private List<FileSystemNode> getSnapshotList() {
         return new ArrayList<>(getCurrentList());
     }
 
     @Override
     public void submitList(@Nullable List<FileSystemNode> list) {
-        super.submitList(list, null);
+        this.submitList(list, null);
     }
 
     @Override
@@ -148,6 +161,17 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_file_node, parent, false);
         return new VH(itemView);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull VH holder, int position, @NonNull List<Object> payloads) {
+        for (Object payload : payloads) {
+            if (PAYLOAD_RENAME == payload || PAYLOAD_CHOICE == payload) {
+                holder.applyBasic(getItem(position));
+                return;
+            }
+        }
+        super.onBindViewHolder(holder, position, payloads);
     }
 
     @Override
@@ -210,7 +234,14 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
         }
 
         void bindTo(FileSystemNode node) {
+            Log.d(TAG, "bindTo() called with: node = [" + node + "]");
             if (node == null) return;
+            applyBasic(node);
+            applyImage(node);
+        }
+
+
+        private void applyImage(FileSystemNode node) {
             if (node instanceof DirectoryNode) {
                 ivFileView.setImageResource(R.mipmap.ic_folder);
             } else {
@@ -219,16 +250,18 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
                         .error(R.mipmap.defualt_img)
                         .into(ivFileView);
             }
-            tvFileNameView.setText(node.getFileName());
+        }
 
+
+        private void applyBasic(FileSystemNode node) {
+            tvFileNameView.setText(node.getFileName());
+            mLastModifiedView.setText(sdf.format(node.lastModified()));
             if (editMode) {
                 mCheckBox.setVisibility(View.VISIBLE);
                 mCheckBox.setChecked(itemSelectedArray.get(getAdapterPosition(), false));
             } else {
                 mCheckBox.setVisibility(View.GONE);
             }
-
-            mLastModifiedView.setText(sdf.format(node.lastModified()));
         }
 
 
