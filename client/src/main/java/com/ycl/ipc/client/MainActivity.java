@@ -2,7 +2,6 @@ package com.ycl.ipc.client;
 
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +12,7 @@ import com.ycl.sdk_base.IActivityManager;
 import com.ycl.sdk_base.ICarListener;
 import com.ycl.sdk_base.bean.VideoViewAngleData;
 
-public class MainActivity extends AppCompatActivity implements UsbContract.View {
+public class MainActivity extends AppCompatActivity {
 
     IPCSingleton<IActivityManager> singleton = new IPCSingleton<>(IActivityManager.class);
     private static final String TAG = ">>>>>>>>>>";
@@ -28,20 +27,7 @@ public class MainActivity extends AppCompatActivity implements UsbContract.View 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        ImageView iv = findViewById(R.id.iv);
-//        Executors.newSingleThreadExecutor().execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    new FileScanManager().scan(getCacheDir().getPath(), null);
-//                } catch (RemoteException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//        startService(new Intent(this, MyService.class));
-//        iActivityManager = singleton.get();
-//        new UsbPresenter(this);
+        iActivityManager = singleton.get();
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,13 +80,4 @@ public class MainActivity extends AppCompatActivity implements UsbContract.View 
     }
 
 
-    @Override
-    public void setPresenter(UsbContract.Presenter presenter) {
-        presenter.scan();
-    }
-
-    @Override
-    public void onScanSuccess() {
-        Log.i(TAG, "onScanSuccess() called thread: " + Thread.currentThread().getName());
-    }
 }

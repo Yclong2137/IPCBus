@@ -6,8 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.ycl.file_manager.business.filter.INodeFilter;
+import com.ycl.file_manager.business.sort.ISortStrategy;
 import com.ycl.file_manager.business.tree.DirectoryNode;
 import com.ycl.file_manager.business.tree.FileSystemNode;
 
@@ -46,24 +49,32 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
     /**
      * 编辑
      */
-    public void applyEditModeOp() {
-        this.editMode = !this.editMode;
+    public void applyEditModeOp(boolean editMode) {
+        this.editMode = editMode;
         notifyItemRangeChanged(0, getCurrentList().size());
+    }
+
+    /**
+     * 是否是编辑模式
+     */
+    public boolean isEditMode() {
+        return editMode;
     }
 
     /**
      * 重命名
      *
-     * @param node
-     * @param name
+     * @param node     点中节点
+     * @param name     新名称
+     * @param strategy 排序策略
      */
-    public void applyRenameOp(FileSystemNode node, String name) {
+    public void applyRenameOp(FileSystemNode node, String name, ISortStrategy strategy) {
         if (node.rename(name)) {
-            int index = getCurrentList().indexOf(node);
-            if (index != -1) {
-                notifyItemChanged(index);
+            FileSystemNode parent;
+            if ((parent = node.getParent()) != null && parent instanceof DirectoryNode) {
+                //重命名后需要重新排序
+                this.submitList(((DirectoryNode) parent).getSubNodes(strategy));
             }
-
         }
 
     }
@@ -86,6 +97,9 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
         this.submitList(snapshot);
     }
 
+    /**
+     * 选中的文件节点
+     */
     public List<FileSystemNode> getSelectedNodes() {
 
         List<FileSystemNode> nodes = new ArrayList<>();
@@ -95,14 +109,23 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
         return nodes;
     }
 
+    /**
+     * 获取选中数量
+     */
+    public int getSelectedCount() {
+        return itemSelectedArray.size();
+    }
+
+    /**
+     * 快照
+     */
     private List<FileSystemNode> getSnapshot() {
         return new ArrayList<>(getCurrentList());
     }
 
     @Override
     public void submitList(@Nullable List<FileSystemNode> list) {
-        this.itemSelectedArray.clear();
-        super.submitList(list);
+        super.submitList(list, null);
     }
 
     @Override
@@ -157,6 +180,9 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
                             itemSelectedArray.delete(position);
                         }
                         mCheckBox.setChecked(candidate);
+                        if (mOnItemClickListener != null) {
+                            mOnItemClickListener.onItemSelectedChanged(getItem(position));
+                        }
                     } else {
                         if (mOnItemClickListener != null) {
                             mOnItemClickListener.onItemClick(getItem(position));
@@ -164,29 +190,23 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
                     }
                 }
             });
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    String name = "n" + new Random().nextInt(200);
-                    applyRenameOp(getItem(getAdapterPosition()), name);
-                    return true;
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (!buttonView.isPressed()) {
+                        return;
+                    }
+                    int position = getAdapterPosition();
+                    if (isChecked) {
+                        itemSelectedArray.put(position, true);
+                    } else {
+                        itemSelectedArray.delete(position);
+                    }
+                    if (mOnItemClickListener != null) {
+                        mOnItemClickListener.onItemSelectedChanged(getItem(position));
+                    }
                 }
             });
-//            mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    if (!buttonView.isPressed()) {
-//                        return;
-//                    }
-//                    int position = getAdapterPosition();
-//                    if (isChecked) {
-//                        itemSelectedArray.put(position, true);
-//                    } else {
-//                        itemSelectedArray.delete(position);
-//                    }
-//
-//                }
-//            });
         }
 
         void bindTo(FileSystemNode node) {
@@ -229,6 +249,8 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
     public interface OnItemClickListener {
 
         void onItemClick(FileSystemNode node);
+
+        void onItemSelectedChanged(FileSystemNode node);
 
     }
 

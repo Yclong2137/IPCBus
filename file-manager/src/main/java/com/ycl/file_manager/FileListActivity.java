@@ -30,13 +30,16 @@ import java.util.Arrays;
 
 public class FileListActivity extends AppCompatActivity {
 
-    private static final String TAG = "file_mgr_FileListActivity";
+    private static final String TAG = "FileListActivity";
 
     private FileViewModel mFileViewModel;
 
     private FileListAdapter mFileListAdapter;
 
-    private FileSystemNode mCurrentNode;
+    private FileSystemNode mCurDirNode;
+
+    private MenuItem mEditModeMenuItem;
+
     /**
      * 排序策略
      */
@@ -55,16 +58,31 @@ public class FileListActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "click close buttonl");
-                if (mCurrentNode != null) {
-                    FileSystemNode parent = mCurrentNode.getParent();
+                if (mCurDirNode != null) {
+                    FileSystemNode parent = mCurDirNode.getParent();
                     if (parent instanceof DirectoryNode) {
                         mFileListAdapter.submitList(((DirectoryNode) parent).getSubNodes(mSortStrategy, mNodeFilter));
-                        mCurrentNode = parent;
+                        mCurDirNode = parent;
                     }
                 }
             }
         });
         mFileViewModel = new ViewModelProvider(this, new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(FileViewModel.class);
+        mFileViewModel.getEditModeLivedata().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean candidate) {
+                if (mEditModeMenuItem != null) {
+                    if (candidate) {
+                        mEditModeMenuItem.setTitle("取消");
+                    } else {
+                        mEditModeMenuItem.setTitle("编辑");
+                    }
+                }
+                if (mFileListAdapter != null) {
+                    mFileListAdapter.applyEditModeOp(candidate);
+                }
+            }
+        });
         initView();
         requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
     }
@@ -80,16 +98,24 @@ public class FileListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.id_menu_delete:
-                Toast.makeText(this, "删除", Toast.LENGTH_SHORT).show();
-                if (mFileListAdapter != null) mFileListAdapter.applyDelOp(mNodeFilter);
+                if (mFileListAdapter.getSelectedCount() > 0) {
+                    if (mFileListAdapter != null) mFileListAdapter.applyDelOp(mNodeFilter);
+                } else {
+                    Toast.makeText(this, "请选择文件", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.id_menu_edit:
-                Toast.makeText(this, "编辑", Toast.LENGTH_SHORT).show();
-                if (mFileListAdapter != null) mFileListAdapter.applyEditModeOp();
+                this.mEditModeMenuItem = item;
+                boolean candidate = !mFileListAdapter.isEditMode();
+                mFileViewModel.applyEditMode(candidate);
+
                 break;
             case R.id.id_menu_rename:
-                Toast.makeText(this, "重命名", Toast.LENGTH_SHORT).show();
-                //if (mFileListAdapter != null) mFileListAdapter.applyRenameOp();
+                if (mFileListAdapter.getSelectedCount() == 1) {
+                    if (mFileListAdapter != null) mFileListAdapter.applyDelOp(mNodeFilter);
+                } else {
+                    Toast.makeText(this, "只能选择一个文件", Toast.LENGTH_SHORT).show();
+                }
 
                 break;
         }
@@ -122,12 +148,17 @@ public class FileListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(FileSystemNode node) {
                 Log.d(TAG, "onItemClick() called with: node = [" + node + "]");
-                mCurrentNode = node;
                 if (node instanceof DirectoryNode) {
                     mFileListAdapter.submitList(((DirectoryNode) node).getSubNodes(mSortStrategy, mNodeFilter));
+                    mCurDirNode = node;
                 } else {
                     Toast.makeText(FileListActivity.this, "点击了文件" + node.getFileName(), Toast.LENGTH_SHORT).show();
                 }
+            }
+
+            @Override
+            public void onItemSelectedChanged(FileSystemNode node) {
+
             }
         });
     }
