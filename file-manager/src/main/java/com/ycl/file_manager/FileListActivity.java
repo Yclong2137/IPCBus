@@ -43,9 +43,9 @@ public class FileListActivity extends AppCompatActivity {
     /**
      * 排序策略
      */
-    private final ISortStrategy mSortStrategy = SortStrategy.NONE;
+    private final ISortStrategy mSortStrategy = SortStrategy.SIZE;
 
-    private final INodeFilter mNodeFilter = NodeFilter.NONE;
+    private final INodeFilter mNodeFilter = NodeFilter.PICTURE;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
