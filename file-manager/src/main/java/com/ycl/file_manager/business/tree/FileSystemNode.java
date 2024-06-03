@@ -2,7 +2,7 @@ package com.ycl.file_manager.business.tree;
 
 import androidx.annotation.NonNull;
 
-import com.ycl.file_manager.business.FileNodeAction;
+import com.ycl.file_manager.business.FileNodeOp;
 import com.ycl.file_manager.business.creator.IFileNodeCreator;
 import com.ycl.file_manager.business.filter.INodeFilter;
 
@@ -12,7 +12,7 @@ import java.io.File;
  * FileSystemNode
  * Created by Yclong on 2024/5/29.
  **/
-public abstract class FileSystemNode implements FileNodeAction {
+public abstract class FileSystemNode implements FileNodeOp {
 
     /**
      * 文件路径

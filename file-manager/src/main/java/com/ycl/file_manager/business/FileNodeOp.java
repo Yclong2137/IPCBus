@@ -4,7 +4,7 @@ package com.ycl.file_manager.business;
  * FileNodeAction
  * Created by Yclong on 2024/5/31.
  **/
-public interface FileNodeAction {
+public interface FileNodeOp {
 
 
     /**

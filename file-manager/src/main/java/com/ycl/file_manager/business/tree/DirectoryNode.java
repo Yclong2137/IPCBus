@@ -72,17 +72,38 @@ public class DirectoryNode extends FileSystemNode {
 
     @Override
     public boolean rename(String name) {
-        // TODO: 2024/5/29 重命名
         //1.重命名（没有后缀）
         File oldFile = new File(path);
         File newFile = new File(oldFile.getParent() + File.separator + name);
         if (oldFile.renameTo(newFile)) {
-            // TODO: 2024/6/2 同步修改全部子路径
+            //同步修改全部子路径
             for (FileSystemNode subNode : subNodes) {
-
+                replacePrefixPath(subNode, path, newFile.getPath());
             }
+            this.path = newFile.getPath();
+            setLastModified(System.currentTimeMillis(), false);
         }
-        return false;
+        return true;
+    }
+
+    /**
+     * 替换子节点路径
+     *
+     * @param root    根节点
+     * @param oldPath 历史路径
+     * @param newPath 新路径
+     */
+    private void replacePrefixPath(FileSystemNode root, String oldPath, String newPath) {
+        if (root != null) {
+            root.path = root.path.replace(oldPath, newPath);
+            root.setLastModified(System.currentTimeMillis(), true);
+        }
+        if (root instanceof DirectoryNode) {
+            for (FileSystemNode subNode : ((DirectoryNode) root).getSubNodes()) {
+                replacePrefixPath(subNode, oldPath, newPath);
+            }
+
+        }
     }
 
     @Override
