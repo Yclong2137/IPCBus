@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.ycl.file_manager.business.filter.INodeFilter;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * FileNode
@@ -83,16 +84,23 @@ public class FileNode extends FileSystemNode {
 
     @Override
     public boolean copy(String dstPath) {
-        // TODO: 2024/6/2 待实现
-        File srcFile = new File(path);
-        if (!srcFile.exists()) {
+        try {
+            File srcFile = new File(path);
+            if (!srcFile.exists()) {
+                return false;
+            }
+            File dstFile = new File(dstPath);
+            if (!dstFile.exists()) {
+                dstFile.createNewFile();
+            }
+            //拷贝文件
+            copyFile(srcFile, dstFile);
+        } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
-        File dstFile = new File(dstPath);
-        if (!dstFile.exists()) {
-            return false;
-        }
-        return false;
+
+        return true;
     }
 
 

@@ -112,9 +112,38 @@ public class DirectoryNode extends FileSystemNode {
 
     @Override
     public boolean copy(String dstPath) {
+        doCopyFile(this, dstPath, NodeFilter.NONE);
         return false;
     }
 
+    /**
+     * 拷贝文件夹
+     *
+     * @param dstPath 目标路径
+     * @param filter  过滤器
+     */
+    public boolean copy(String dstPath, INodeFilter filter) {
+        doCopyFile(this, dstPath, filter);
+        return false;
+    }
+
+    private void doCopyFile(FileSystemNode root, String dstPath, INodeFilter filter) {
+        if (root instanceof FileNode) {
+            //拷贝
+            root.copy(dstPath);
+            return;
+        }
+        if (root instanceof DirectoryNode) {
+            //如果文件夹不存在，则先创建
+            File dirFile = new File(root.path);
+            if (!dirFile.exists()) {
+                dirFile.mkdirs();
+            }
+            for (FileSystemNode node : ((DirectoryNode) root).getSubNodes(filter)) {
+                doCopyFile(node, root.path, filter);
+            }
+        }
+    }
 
 
     /**

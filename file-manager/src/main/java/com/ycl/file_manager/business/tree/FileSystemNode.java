@@ -7,12 +7,22 @@ import com.ycl.file_manager.business.creator.IFileNodeCreator;
 import com.ycl.file_manager.business.filter.INodeFilter;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 
 /**
  * FileSystemNode
  * Created by Yclong on 2024/5/29.
  **/
 public abstract class FileSystemNode implements FileNodeOp {
+
+    /**
+     * The file copy buffer size (30 MB)
+     */
+    private static final int FILE_COPY_BUFFER_SIZE = 1024 * 1024 * 30;
+
 
     /**
      * 文件路径
@@ -114,6 +124,30 @@ public abstract class FileSystemNode implements FileNodeOp {
 
     private boolean isSpace(String path) {
         return path == null || path.isEmpty();
+    }
+
+    /**
+     * 拷贝文件
+     *
+     * @param source      源文件
+     * @param destination 目标文件
+     * @throws IOException
+     */
+    protected void copyFile(@NonNull File source, @NonNull File destination) throws IOException {
+
+        try (FileInputStream fis = new FileInputStream(source);
+             FileOutputStream fos = new FileOutputStream(destination);
+             FileChannel input = fis.getChannel();
+             FileChannel output = fos.getChannel()) {
+
+            long size = input.size();
+            long pos = 0;
+            long count;
+            while (pos < size) {
+                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
+                pos += output.transferFrom(input, pos, count);
+            }
+        }
     }
 
     /**
