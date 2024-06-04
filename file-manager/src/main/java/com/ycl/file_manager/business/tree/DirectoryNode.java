@@ -92,26 +92,6 @@ public class DirectoryNode extends FileSystemNode {
         return true;
     }
 
-    /**
-     * 替换子节点路径
-     *
-     * @param root    根节点
-     * @param oldPath 历史路径
-     * @param newPath 新路径
-     */
-    private void replacePrefixPath(FileSystemNode root, String oldPath, String newPath) {
-        if (root != null) {
-            root.path = root.path.replace(oldPath, newPath);
-            root.setLastModified(System.currentTimeMillis(), true);
-        }
-        if (root instanceof DirectoryNode) {
-            for (FileSystemNode subNode : ((DirectoryNode) root).getSubNodes()) {
-                replacePrefixPath(subNode, oldPath, newPath);
-            }
-
-        }
-    }
-
     @Override
     public boolean delete() {
         //删除文件
@@ -135,6 +115,27 @@ public class DirectoryNode extends FileSystemNode {
         return false;
     }
 
+
+
+    /**
+     * 替换子节点路径
+     *
+     * @param root    根节点
+     * @param oldPath 历史路径
+     * @param newPath 新路径
+     */
+    private void replacePrefixPath(FileSystemNode root, String oldPath, String newPath) {
+        if (root != null) {
+            root.path = root.path.replace(oldPath, newPath);
+            root.setLastModified(System.currentTimeMillis(), true);
+        }
+        if (root instanceof DirectoryNode) {
+            for (FileSystemNode subNode : ((DirectoryNode) root).getSubNodes()) {
+                replacePrefixPath(subNode, oldPath, newPath);
+            }
+
+        }
+    }
 
     /**
      * 删除文件
