@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -46,21 +45,6 @@ public class DirectoryNode extends FileSystemNode {
         int numOfFiles = 0;
         for (FileSystemNode subNode : subNodes) {
             numOfFiles += subNode.numOfFiles(filter);
-        }
-        return numOfFiles;
-    }
-
-    public int numOfFiles(@NonNull INodeFilter filter, Map<FileSystemNode, Integer> cache) {
-        int numOfFiles = 0;
-        for (FileSystemNode subNode : subNodes) {
-            if (cache.containsKey(subNode)) {
-                Integer num = cache.get(subNode);
-                numOfFiles += num == null ? 0 : num;
-            } else {
-                int num = subNode.numOfFiles(filter);
-                numOfFiles += num;
-                cache.put(subNode, num);
-            }
         }
         return numOfFiles;
     }
@@ -169,13 +153,13 @@ public class DirectoryNode extends FileSystemNode {
             for (FileSystemNode node : ((DirectoryNode) root).getSubNodes(filter)) {
                 deleteFile(node, filter);
             }
-            // TODO: 2024/5/30 删除文件夹节点(需确认文件夹中是否有其他类型的文件)
-//            File file = new File(root.getPath());
-//            File[] files;
-//            //文件夹存在且文件夹中没有任何文件才能删除
-//            if (file.exists() && file.isDirectory() && (files = file.listFiles()) != null && files.length == 0) {
-//                file.deleteOnExit();
-//            }
+            //删除文件夹节点(需确认文件夹中是否有其他类型的文件)
+            File file = new File(root.getPath());
+            File[] files;
+            //文件夹存在且文件夹中没有任何文件才能删除
+            if (file.exists() && file.isDirectory() && (files = file.listFiles()) != null && files.length == 0) {
+                file.deleteOnExit();
+            }
             //移除本节点
             if (parent instanceof DirectoryNode) {
                 ((DirectoryNode) parent).removeSubNode(this);

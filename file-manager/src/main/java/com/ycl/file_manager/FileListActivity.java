@@ -160,7 +160,7 @@ public class FileListActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.d(TAG, "onRequestPermissionsResult() called with: requestCode = [" + requestCode + "], permissions = [" + Arrays.toString(permissions) + "], grantResults = [" + Arrays.toString(grantResults) + "]");
-        mFileViewModel.loadFileNodes(mNodeFilters[mNodeFilterIndex]);
+        mFileViewModel.loadFileNodes(mNodeFilters[mNodeFilterIndex++]);
     }
 
     /**

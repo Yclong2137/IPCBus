@@ -1,7 +1,6 @@
 package com.ycl.file_manager.business.filter;
 
 
-import com.ycl.file_manager.business.tree.DirectoryNode;
 import com.ycl.file_manager.business.tree.FileSystemNode;
 import com.ycl.file_manager.business.tree.PictureFileNode;
 

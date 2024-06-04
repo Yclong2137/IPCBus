@@ -46,7 +46,11 @@ public class FileNodeStore implements IFileNodeStore {
             FileSystemNode root = FileSystemNode.FACTORY.create(dirFile, nodeCreator);
             //扫描文件
             node = scanFile(root, nodeCreator, nodeFilter);
-
+            System.out.println("---文件数量：" + node.numOfFiles());
+            System.out.println("---文件大小：" + node.sizeOfFiles());
+            System.out.println("-----------------");
+            System.out.println("---文件数量：" + node.numOfFiles(nodeFilter));
+            System.out.println("---文件大小：" + node.sizeOfFiles(nodeFilter));
             if (mOnScanStateListener != null) {
                 mOnScanStateListener.onScanSuccess(node);
             }

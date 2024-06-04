@@ -69,18 +69,16 @@ public class FileNode extends FileSystemNode {
         if (!file.exists()) {
             return false;
         }
-        // TODO: 2024/6/1 暂时不移除文件
-//        boolean b = file.delete();
-//        if (b) {
-//            //更新时间
-//            if (parent != null) {
-//                parent.setLastModified(System.currentTimeMillis());
-//            }
-//        }
-        if (parent instanceof DirectoryNode) {
-            ((DirectoryNode) parent).removeSubNode(this);
+        boolean b = file.delete();
+        if (b) {
+            //更新时间
+            if (parent instanceof DirectoryNode) {
+                parent.setLastModified(System.currentTimeMillis(), true);
+                ((DirectoryNode) parent).removeSubNode(this);
+            }
         }
-        return true;
+
+        return b;
     }
 
     @Override

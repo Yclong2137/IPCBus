@@ -2,7 +2,6 @@ package com.ycl.file_manager.business.filter;
 
 
 import com.ycl.file_manager.business.tree.AudioFileNode;
-import com.ycl.file_manager.business.tree.DirectoryNode;
 import com.ycl.file_manager.business.tree.FileSystemNode;
 
 /**
