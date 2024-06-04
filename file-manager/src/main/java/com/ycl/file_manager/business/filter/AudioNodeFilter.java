@@ -20,9 +20,6 @@ public class AudioNodeFilter extends KeywordNodeFilter {
     @Override
     public boolean doFilter(FileSystemNode node) {
         boolean isAudio = node instanceof AudioFileNode;
-//        if (node instanceof DirectoryNode) {
-//            isAudio = true;
-//        }
         return isAudio && super.doFilter(node);
     }
 

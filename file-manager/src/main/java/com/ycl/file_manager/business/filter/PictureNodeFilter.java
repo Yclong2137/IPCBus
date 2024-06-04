@@ -21,9 +21,6 @@ public class PictureNodeFilter extends KeywordNodeFilter {
     @Override
     public boolean doFilter(FileSystemNode node) {
         boolean isPic = node instanceof PictureFileNode;
-//        if (node instanceof DirectoryNode) {
-//            isPic = true;
-//        }
         return isPic && super.doFilter(node);
     }
 

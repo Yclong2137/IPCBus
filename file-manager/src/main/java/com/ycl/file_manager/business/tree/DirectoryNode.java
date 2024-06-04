@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -33,7 +34,6 @@ public class DirectoryNode extends FileSystemNode {
 
     @Override
     public int numOfFiles() {
-        // TODO: 2024/5/29 可做优化，无需每次都计算
         int numOfFiles = 0;
         for (FileSystemNode subNode : subNodes) {
             numOfFiles += subNode.numOfFiles();
@@ -50,9 +50,23 @@ public class DirectoryNode extends FileSystemNode {
         return numOfFiles;
     }
 
+    public int numOfFiles(@NonNull INodeFilter filter, Map<FileSystemNode, Integer> cache) {
+        int numOfFiles = 0;
+        for (FileSystemNode subNode : subNodes) {
+            if (cache.containsKey(subNode)) {
+                Integer num = cache.get(subNode);
+                numOfFiles += num == null ? 0 : num;
+            } else {
+                int num = subNode.numOfFiles(filter);
+                numOfFiles += num;
+                cache.put(subNode, num);
+            }
+        }
+        return numOfFiles;
+    }
+
     @Override
     public long sizeOfFiles() {
-        // TODO: 2024/5/29 可做优化，无需每次都计算
         long sizeOfFiles = 0;
         for (FileSystemNode subNode : subNodes) {
             sizeOfFiles += subNode.sizeOfFiles();
@@ -121,6 +135,11 @@ public class DirectoryNode extends FileSystemNode {
         return true;
     }
 
+    /**
+     * 删除文件
+     *
+     * @param filter 过滤器
+     */
     public boolean delete(INodeFilter filter) {
         //删除文件
         deleteFile(this, filter);
