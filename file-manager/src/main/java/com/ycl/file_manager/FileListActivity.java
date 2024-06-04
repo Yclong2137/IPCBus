@@ -41,12 +41,14 @@ public class FileListActivity extends AppCompatActivity {
 
     private MenuItem mEditModeMenuItem;
 
-    /**
-     * 排序策略
-     */
-    private final ISortStrategy mSortStrategy = SortStrategy.NAME;
+    private final ISortStrategy[] mSortStrategies = new ISortStrategy[]{SortStrategy.NONE, SortStrategy.NAME, SortStrategy.SIZE, SortStrategy.TIME};
 
-    private final INodeFilter mNodeFilter = NodeFilter.PICTURE;
+    private int mSortIndex;
+
+    private final INodeFilter[] mNodeFilters = new INodeFilter[]{NodeFilter.NONE, NodeFilter.PICTURE, NodeFilter.AUDIO, NodeFilter.VIDEO};
+
+    private int mNodeFilterIndex;
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -62,7 +64,7 @@ public class FileListActivity extends AppCompatActivity {
                 if (mCurDirNode != null) {
                     FileSystemNode parent = mCurDirNode.getParent();
                     if (parent instanceof DirectoryNode) {
-                        mFileListAdapter.submitList(((DirectoryNode) parent).getSubNodes(mSortStrategy, mNodeFilter));
+                        mFileListAdapter.submitList(((DirectoryNode) parent).getSubNodes(mSortStrategies[mSortIndex], mNodeFilters[mNodeFilterIndex]));
                         mCurDirNode = parent;
                         applyEditMode(false);
                     }
@@ -86,7 +88,8 @@ public class FileListActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.id_menu_delete:
                 if (mFileListAdapter.getSelectedCount() > 0) {
-                    if (mFileListAdapter != null) mFileListAdapter.applyDelOp(mNodeFilter);
+                    if (mFileListAdapter != null)
+                        mFileListAdapter.applyDelOp(mNodeFilters[mNodeFilterIndex]);
                 } else {
                     Toast.makeText(this, "请选择文件", Toast.LENGTH_SHORT).show();
                 }
@@ -100,22 +103,64 @@ public class FileListActivity extends AppCompatActivity {
             case R.id.id_menu_rename:
                 if (mFileListAdapter.getSelectedCount() > 0) {
                     for (int position : mFileListAdapter.getSelectedPosArray()) {
-                        mFileListAdapter.applyRenameOp(position, "n" + new Random().nextInt(200), mSortStrategy);
+                        mFileListAdapter.applyRenameOp(position, "n" + new Random().nextInt(200), mSortStrategies[mSortIndex]);
                     }
                 } else {
                     Toast.makeText(this, "请选择文件", Toast.LENGTH_SHORT).show();
                 }
 
                 break;
+
+            case R.id.id_menu_sort:
+                nextSortIndex();
+                ISortStrategy sortStrategy = mSortStrategies[mSortIndex];
+                item.setTitle(sortStrategy.getName());
+                if (mCurDirNode instanceof DirectoryNode) {
+                    mFileListAdapter.submitList(((DirectoryNode) mCurDirNode).getSubNodes(sortStrategy, mNodeFilters[mNodeFilterIndex]));
+                }
+                break;
+
+            case R.id.id_menu_file_types:
+                nextNodeFilterIndex();
+                INodeFilter nodeFilter = mNodeFilters[mNodeFilterIndex];
+                item.setTitle(nodeFilter.getName());
+                if (mCurDirNode instanceof DirectoryNode) {
+                    mFileListAdapter.submitList(((DirectoryNode) mCurDirNode).getSubNodes(mSortStrategies[mSortIndex], nodeFilter));
+                }
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void submitList(ISortStrategy strategy, INodeFilter filter) {
+        if (mCurDirNode instanceof DirectoryNode) {
+            mFileListAdapter.submitList(((DirectoryNode) mCurDirNode).getSubNodes(mSortStrategies[mSortIndex], filter));
+        }
+    }
+
+    private int nextSortIndex() {
+        int length = mSortStrategies.length;
+        mSortIndex++;
+        if (mSortIndex >= length) {
+            mSortIndex = 0;
+        }
+        return mSortIndex;
+    }
+
+    private int nextNodeFilterIndex() {
+        int length = mNodeFilters.length;
+        mNodeFilterIndex++;
+        if (mNodeFilterIndex >= length) {
+            mNodeFilterIndex = 0;
+        }
+        return mNodeFilterIndex;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.d(TAG, "onRequestPermissionsResult() called with: requestCode = [" + requestCode + "], permissions = [" + Arrays.toString(permissions) + "], grantResults = [" + Arrays.toString(grantResults) + "]");
-        mFileViewModel.loadFileNodes(mNodeFilter);
+        mFileViewModel.loadFileNodes(mNodeFilters[mNodeFilterIndex]);
     }
 
     /**
@@ -149,7 +194,8 @@ public class FileListActivity extends AppCompatActivity {
             public void onChanged(FileSystemNode node) {
                 Log.d(TAG, "onChanged() called with: node = [" + node + "]");
                 if (node instanceof DirectoryNode) {
-                    mFileListAdapter.submitList(((DirectoryNode) node).getSubNodes(mSortStrategy, mNodeFilter));
+                    mCurDirNode = node;
+                    mFileListAdapter.submitList(((DirectoryNode) node).getSubNodes(mSortStrategies[mSortIndex], mNodeFilters[mNodeFilterIndex]));
                 }
             }
         });
@@ -158,7 +204,7 @@ public class FileListActivity extends AppCompatActivity {
             public void onItemClick(FileSystemNode node) {
                 Log.d(TAG, "onItemClick() called with: node = [" + node + "]");
                 if (node instanceof DirectoryNode) {
-                    mFileListAdapter.submitList(((DirectoryNode) node).getSubNodes(mSortStrategy, mNodeFilter));
+                    mFileListAdapter.submitList(((DirectoryNode) node).getSubNodes(mSortStrategies[mSortIndex], mNodeFilters[mNodeFilterIndex]));
                     mCurDirNode = node;
                 } else {
                     Toast.makeText(FileListActivity.this, "点击了文件" + node.getFileName(), Toast.LENGTH_SHORT).show();

@@ -37,4 +37,9 @@ public class NameSortStrategy implements ISortStrategy {
         });
         return nodes;
     }
+
+    @Override
+    public String getName() {
+        return "Name";
+    }
 }

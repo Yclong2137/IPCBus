@@ -38,4 +38,9 @@ public class TimeSortStrategy implements ISortStrategy {
         return nodes;
     }
 
+    @Override
+    public String getName() {
+        return "Time";
+    }
+
 }

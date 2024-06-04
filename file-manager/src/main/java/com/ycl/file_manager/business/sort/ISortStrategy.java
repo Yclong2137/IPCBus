@@ -22,5 +22,9 @@ public interface ISortStrategy {
      */
     List<FileSystemNode> getSortNodes(List<FileSystemNode> nodes);
 
+    /**
+     * 排序策略名称
+     */
+    String getName();
 
 }

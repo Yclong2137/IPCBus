@@ -16,5 +16,8 @@ public interface INodeFilter {
      */
     boolean doFilter(FileSystemNode node);
 
-
+    /**
+     * 过滤器名称
+     */
+    String getName();
 }

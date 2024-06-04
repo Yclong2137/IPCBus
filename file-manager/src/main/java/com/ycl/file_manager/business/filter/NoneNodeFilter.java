@@ -21,4 +21,9 @@ public class NoneNodeFilter implements INodeFilter {
     public boolean doFilter(FileSystemNode node) {
         return true;
     }
+
+    @Override
+    public String getName() {
+        return "None";
+    }
 }

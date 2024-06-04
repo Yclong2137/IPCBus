@@ -37,4 +37,9 @@ public class SizeSortStrategy implements ISortStrategy {
         });
         return nodes;
     }
+
+    @Override
+    public String getName() {
+        return "Size";
+    }
 }

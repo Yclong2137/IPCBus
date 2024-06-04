@@ -21,4 +21,9 @@ public class NoneSortStrategy implements ISortStrategy {
     public List<FileSystemNode> getSortNodes(List<FileSystemNode> nodes) {
         return nodes;
     }
+
+    @Override
+    public String getName() {
+        return "None";
+    }
 }

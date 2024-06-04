@@ -17,4 +17,16 @@
         android:title="编辑"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/id_menu_sort"
+        android:orderInCategory="100"
+        android:title="切换排序"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/id_menu_file_types"
+        android:orderInCategory="100"
+        android:title="切换文件类型"
+        app:showAsAction="never" />
+
 </menu>

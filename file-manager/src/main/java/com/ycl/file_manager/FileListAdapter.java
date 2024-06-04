@@ -166,8 +166,12 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position, @NonNull List<Object> payloads) {
         for (Object payload : payloads) {
-            if (PAYLOAD_RENAME == payload || PAYLOAD_CHOICE == payload) {
+            if (PAYLOAD_RENAME == payload ) {
                 holder.applyBasic(getItem(position));
+                return;
+            }
+            if (PAYLOAD_CHOICE == payload ) {
+                holder.applyEditState();
                 return;
             }
         }
@@ -238,6 +242,7 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
             if (node == null) return;
             applyBasic(node);
             applyImage(node);
+            applyEditState();
         }
 
 
@@ -253,15 +258,19 @@ public class FileListAdapter extends ListAdapter<FileSystemNode, FileListAdapter
         }
 
 
-        private void applyBasic(FileSystemNode node) {
-            tvFileNameView.setText(node.getFileName());
-            mLastModifiedView.setText(sdf.format(node.lastModified()));
+        private void applyEditState() {
             if (editMode) {
                 mCheckBox.setVisibility(View.VISIBLE);
                 mCheckBox.setChecked(itemSelectedArray.get(getAdapterPosition(), false));
             } else {
                 mCheckBox.setVisibility(View.GONE);
             }
+        }
+
+
+        private void applyBasic(FileSystemNode node) {
+            tvFileNameView.setText(node.getFileName());
+            mLastModifiedView.setText(sdf.format(node.lastModified()));
         }
 
 

@@ -52,6 +52,6 @@ public final class DefaultFileNodeCreator implements IFileNodeCreator {
         if (VIDEO_PATTERN.matcher(fileName).matches()) {
             return new VideoFileNode(file.getPath());
         }
-        return new FileNode(file.getPath());
+        return null;
     }
 }

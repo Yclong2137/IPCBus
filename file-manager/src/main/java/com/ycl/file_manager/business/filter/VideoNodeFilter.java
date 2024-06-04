@@ -20,9 +20,14 @@ public class VideoNodeFilter extends KeywordNodeFilter {
     @Override
     public boolean doFilter(FileSystemNode node) {
         boolean isVideo = node instanceof VideoFileNode;
-        if (node instanceof DirectoryNode) {
-            isVideo = true;
-        }
+//        if (node instanceof DirectoryNode) {
+//            isVideo = true;
+//        }
         return isVideo && super.doFilter(node);
+    }
+
+    @Override
+    public String getName() {
+        return "Video";
     }
 }

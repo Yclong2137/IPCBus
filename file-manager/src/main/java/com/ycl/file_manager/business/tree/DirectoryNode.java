@@ -43,7 +43,11 @@ public class DirectoryNode extends FileSystemNode {
 
     @Override
     public int numOfFiles(@NonNull INodeFilter filter) {
-        return filter.doFilter(this) ? numOfFiles() : 0;
+        int numOfFiles = 0;
+        for (FileSystemNode subNode : subNodes) {
+            numOfFiles += subNode.numOfFiles(filter);
+        }
+        return numOfFiles;
     }
 
     @Override
@@ -58,7 +62,11 @@ public class DirectoryNode extends FileSystemNode {
 
     @Override
     public long sizeOfFiles(@NonNull INodeFilter filter) {
-        return filter.doFilter(this) ? sizeOfFiles() : 0;
+        long sizeOfFiles = 0;
+        for (FileSystemNode subNode : subNodes) {
+            sizeOfFiles += subNode.sizeOfFiles(filter);
+        }
+        return sizeOfFiles;
     }
 
     @Override
@@ -238,8 +246,14 @@ public class DirectoryNode extends FileSystemNode {
         }
         List<FileSystemNode> list = new ArrayList<>();
         for (FileSystemNode node : nodes) {
-            if (filter.doFilter(node)) {
-                list.add(node);
+            if (node instanceof DirectoryNode) {
+                if (node.numOfFiles(filter) > 0) {
+                    list.add(node);
+                }
+            } else {
+                if (filter.doFilter(node)) {
+                    list.add(node);
+                }
             }
         }
         return list;

@@ -37,4 +37,9 @@ public class KeywordNodeFilter implements INodeFilter {
         }
         return fileName.contains(keyword);
     }
+
+    @Override
+    public String getName() {
+        return "keyword";
+    }
 }
